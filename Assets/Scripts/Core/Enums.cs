@@ -234,4 +234,115 @@ namespace DecisionKingdom.Core
         Left,
         Right
     }
+
+    // ============================================
+    // MONETIZATION ENUMS (Phase 7)
+    // ============================================
+
+    /// <summary>
+    /// Satın alınabilir ürün türleri
+    /// </summary>
+    public enum IAPProductType
+    {
+        // Era Unlocks
+        EraRenaissance,         // Rönesans dönemi açma ($0.99)
+        EraIndustrial,          // Sanayi dönemi açma ($1.49)
+        EraModern,              // Modern dönem açma ($1.99)
+        EraFuture,              // Gelecek dönemi açma ($2.99)
+        EraBundle,              // Tüm dönemler paketi ($4.99)
+
+        // Scenarios
+        ScenarioYoungHeir,      // Genç Varis senaryosu ($0.99)
+        ScenarioCoupLeader,     // Darbe Lideri senaryosu ($0.99)
+        ScenarioRichMerchant,   // Zengin Tüccar senaryosu ($0.99)
+        ScenarioBundle,         // Tüm senaryolar paketi ($1.99)
+
+        // Cosmetics
+        CosmeticCardBackPack1,  // Kart arkası paketi 1 ($0.99)
+        CosmeticCardBackPack2,  // Kart arkası paketi 2 ($0.99)
+        CosmeticThemePack,      // UI tema paketi ($0.99)
+        CosmeticBundle,         // Tüm kozmetik paketi ($1.99)
+
+        // Premium
+        AdRemoval,              // Reklam kaldırma ($2.99)
+        CompleteBundle          // Komple paket ($6.99)
+    }
+
+    /// <summary>
+    /// Reklam türleri
+    /// </summary>
+    public enum AdType
+    {
+        Interstitial,           // Geçiş reklamı (Game Over sonrası)
+        RewardedRevive,         // Ödüllü: Yeniden canlanma
+        RewardedResourceBoost,  // Ödüllü: Kaynak artışı
+        RewardedDoublePP        // Ödüllü: 2x Prestige Point
+    }
+
+    /// <summary>
+    /// Kart arkası tasarımları
+    /// </summary>
+    public enum CardBackDesign
+    {
+        Default,                // Varsayılan (ücretsiz)
+        Royal,                  // Kraliyet motifi
+        Dragon,                 // Ejderha motifi
+        Celtic,                 // Kelt desenleri
+        Gothic,                 // Gotik tarzı
+        Minimalist,             // Minimalist tasarım
+        Golden,                 // Altın tasarım
+        Dark,                   // Karanlık tema
+        Floral,                 // Çiçek desenleri
+        Geometric               // Geometrik desenler
+    }
+
+    /// <summary>
+    /// UI tema seçenekleri
+    /// </summary>
+    public enum UITheme
+    {
+        Default,                // Varsayılan (ücretsiz)
+        Dark,                   // Karanlık tema
+        Minimalist,             // Minimalist tema
+        Royal,                  // Kraliyet teması
+        Nature,                 // Doğa teması
+        Steampunk,              // Steampunk tema
+        Futuristic              // Gelecek teması
+    }
+
+    /// <summary>
+    /// Satın alma durumu
+    /// </summary>
+    public enum PurchaseState
+    {
+        NotPurchased,           // Satın alınmadı
+        Pending,                // Beklemede
+        Purchased,              // Satın alındı
+        Failed,                 // Başarısız
+        Restored                // Geri yüklendi
+    }
+
+    /// <summary>
+    /// Reklam izleme durumu
+    /// </summary>
+    public enum AdWatchState
+    {
+        NotAvailable,           // Mevcut değil
+        Available,              // İzlenebilir
+        Loading,                // Yükleniyor
+        Showing,                // Gösteriliyor
+        Completed,              // Tamamlandı
+        Skipped,                // Atlandı
+        Failed                  // Başarısız
+    }
+
+    /// <summary>
+    /// Premium üyelik durumu
+    /// </summary>
+    public enum PremiumStatus
+    {
+        Free,                   // Ücretsiz kullanıcı
+        AdFree,                 // Reklamsız
+        Premium                 // Tam premium
+    }
 }
