@@ -7,8 +7,9 @@ Bu doküman, Decision Kingdom oyununun teknik implementasyon planını ve geliş
 ## Genel Bakış
 
 **Tahmini Toplam Süre:** 16-20 hafta
-**Teknoloji Stack Önerisi:** Unity (C#) veya React Native/Flutter (mobil cross-platform)
-**Hedef Platform:** iOS & Android
+**Teknoloji Stack:** Unity (C#)
+**Unity Versiyon:** 2022 LTS veya üzeri
+**Hedef Platform:** iOS, Android, PC (Steam)
 
 ---
 
@@ -403,70 +404,88 @@ Bu doküman, Decision Kingdom oyununun teknik implementasyon planını ve geliş
 
 ## Teknik Notlar
 
-### Veri Yapıları
+### Veri Yapıları (C#)
 
-```typescript
+```csharp
 // Resource System
-interface Resources {
-  gold: number;      // 0-100
-  happiness: number; // 0-100
-  military: number;  // 0-100
-  faith: number;     // 0-100
+[System.Serializable]
+public class Resources
+{
+    [Range(0, 100)] public int gold;       // 0-100
+    [Range(0, 100)] public int happiness;  // 0-100
+    [Range(0, 100)] public int military;   // 0-100
+    [Range(0, 100)] public int faith;      // 0-100
 }
 
 // Card/Event System
-interface GameEvent {
-  id: string;
-  era: Era;
-  category: EventCategory;
-  character?: Character;
-  text: string;
-  leftChoice: Choice;
-  rightChoice: Choice;
-  conditions: Condition[];
-  priority: number;
-  weight: number;
-  isRare: boolean;
+[System.Serializable]
+public class GameEvent
+{
+    public string id;
+    public Era era;
+    public EventCategory category;
+    public Character character;
+    public string text;
+    public Choice leftChoice;
+    public Choice rightChoice;
+    public List<Condition> conditions;
+    public int priority;
+    public float weight;
+    public bool isRare;
 }
 
-interface Choice {
-  text: string;
-  effects: ResourceEffect[];
-  triggeredEventIds: string[];
-  flags: string[];
+[System.Serializable]
+public class Choice
+{
+    public string text;
+    public List<ResourceEffect> effects;
+    public List<string> triggeredEventIds;
+    public List<string> flags;
 }
 
-interface ResourceEffect {
-  resource: ResourceType;
-  min: number;
-  max: number;
+[System.Serializable]
+public class ResourceEffect
+{
+    public ResourceType resource;
+    public int min;
+    public int max;
 }
 
 // Character System
-interface Character {
-  id: string;
-  name: string;
-  title: string;
-  portrait: string;
-  era: Era[];
+[System.Serializable]
+public class Character
+{
+    public string id;
+    public string name;
+    public string title;
+    public Sprite portrait;
+    public List<Era> eras;
 }
 
-interface CharacterState {
-  characterId: string;
-  interactionCount: number;
-  relationship: number;
-  flags: string[];
+[System.Serializable]
+public class CharacterState
+{
+    public string characterId;
+    public int interactionCount;
+    public int relationship;
+    public List<string> flags;
 }
 
 // Game State
-interface GameState {
-  resources: Resources;
-  turn: number;
-  era: Era;
-  characterStates: Map<string, CharacterState>;
-  flags: Set<string>;
-  eventHistory: string[];
+public class GameState
+{
+    public Resources resources;
+    public int turn;
+    public Era era;
+    public Dictionary<string, CharacterState> characterStates;
+    public HashSet<string> flags;
+    public List<string> eventHistory;
 }
+
+// Enums
+public enum Era { Medieval, Renaissance, Industrial, Modern, Future }
+public enum EventCategory { Story, Random, Character, Chain, Rare }
+public enum ResourceType { Gold, Happiness, Military, Faith }
 ```
 
 ### Event Seçim Algoritması

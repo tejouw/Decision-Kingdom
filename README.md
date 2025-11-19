@@ -1,12 +1,18 @@
-# Decision Kingdom 👑
+# Decision Kingdom
 
 **Türkçe Kart Tabanlı Strateji Oyunu**
 
-## 🎮 Oyun Hakkında
+## Oyun Hakkında
 
 Decision Kingdom, oyuncuların bir krallığı yönettiği, kart tabanlı bir strateji ve karar verme oyunudur. Her seçiminizin ağırlığını hissedeceğiniz, sonuçlarının nesiller boyu süreceği bir deneyim yaşayacaksınız.
 
-## 🇹🇷 Dil
+## Teknik Platform
+
+- **Motor:** Unity 2022 LTS+
+- **Programlama Dili:** C#
+- **Hedef Platformlar:** iOS, Android, PC (Steam)
+
+## Dil
 
 Bu oyun **tamamen Türkçe** olarak geliştirilmektedir. Tüm:
 - Oyun içi metinler
@@ -17,7 +23,7 @@ Bu oyun **tamamen Türkçe** olarak geliştirilmektedir. Tüm:
 
 Türk oyuncular için Türkçe dilinde hazırlanmaktadır.
 
-## 📋 Özellikler
+## Özellikler
 
 - **4 Kaynak Sistemi**: Altın, Mutluluk, Askeri Güç, İnanç/Etki
 - **5 Tarihsel Çağ**: Ortaçağ, Rönesans, Sanayi, Modern, Gelecek
@@ -25,16 +31,42 @@ Türk oyuncular için Türkçe dilinde hazırlanmaktadır.
 - **Dinamik Danışman Sistemi**: Krallığınızı yönetmenize yardımcı olan karakterler
 - **Miras Sistemi**: Kararlarınızın gelecek nesillere etkisi
 
-## 📁 Proje Yapısı
+## Proje Yapısı
 
-- `GAME_DESIGN.md` - Detaylı oyun tasarım dokümanı (Türkçe)
-- `README.md` - Proje açıklaması
+```
+Decision-Kingdom/
+├── GAME_DESIGN.md        # Detaylı oyun tasarım dokümanı (Türkçe)
+├── IMPLEMENTATION_PLAN.md # Teknik implementasyon planı
+├── README.md              # Proje açıklaması
+└── [Unity Project]        # Unity proje dosyaları (eklenecek)
+```
 
-## 🚀 Geliştirme Durumu
+## Geliştirme Durumu
 
-Proje şu anda **tasarım aşamasındadır**. Oyun tasarım dokümanı tamamlanmış olup, geliştirme süreci başlayacaktır.
+Proje şu anda **C# ile Unity'de yeniden yazılma aşamasındadır**.
 
-## 📞 İletişim
+- [x] Oyun tasarım dokümanı tamamlandı
+- [x] Implementasyon planı hazırlandı
+- [ ] Unity projesi oluşturulacak
+- [ ] Core sistemler geliştirilecek
+- [ ] İçerik (eventler, karakterler) eklenecek
+
+## Unity Proje Kurulumu
+
+Unity projesini kurmak için:
+
+1. Unity Hub'ı açın
+2. Unity 2022 LTS veya üzeri bir sürüm yükleyin
+3. Yeni 2D proje oluşturun
+4. Proje dosyalarını bu repository'e ekleyin
+
+## Gereksinimler
+
+- Unity 2022.3 LTS veya üzeri
+- Visual Studio 2022 veya VS Code (C# extension ile)
+- Git
+
+## İletişim
 
 Sorularınız veya önerileriniz için iletişime geçebilirsiniz.
 
