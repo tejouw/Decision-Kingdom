@@ -40,6 +40,9 @@ namespace DecisionKingdom.Core
         public const string SAVE_KEY_ACHIEVEMENTS = "DecisionKingdom_Achievements";
         public const string SAVE_KEY_UNLOCKS = "DecisionKingdom_Unlocks";
         public const string SAVE_KEY_PRESTIGE = "DecisionKingdom_Prestige";
+        public const string SAVE_KEY_DAILY_CHALLENGE = "DecisionKingdom_DailyChallenge";
+        public const string SAVE_KEY_PROFILE = "DecisionKingdom_Profile";
+        public const string SAVE_KEY_LEADERBOARD = "DecisionKingdom_Leaderboard";
 
         // Türkçe kaynak isimleri
         public static readonly string[] RESOURCE_NAMES_TR = {
