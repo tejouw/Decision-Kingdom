@@ -1,0 +1,26 @@
+{
+  "name": "decision-kingdom",
+  "version": "0.1.0",
+  "description": "Türkçe kart tabanlı strateji oyunu",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "start": "npx serve .",
+    "test": "jest"
+  },
+  "keywords": [
+    "game",
+    "card-game",
+    "strategy",
+    "turkish"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+}
