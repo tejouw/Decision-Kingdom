@@ -611,6 +611,363 @@ namespace DecisionKingdom.Content
             });
             events.Add(lateGameEvent);
 
+            // ============ GEÇİŞ EVENTLERİ (Transition Events) ============
+
+            // Tur 10 - İlk dönüm noktası
+            var turn10Event = CreateEvent("med_turn_10", Era.Medieval, EventCategory.Story, null,
+                "İlk on gününüz geride kaldı. Danışmanlarınız toplanmış durumda. 'Majeste, nasıl devam edeceğiz?'",
+                new Choice("Halka odaklan")
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Gold, -5)
+                    .AddFlag("people_focused"),
+                new Choice("Güce odaklan")
+                    .AddEffect(ResourceType.Military, 10)
+                    .AddEffect(ResourceType.Faith, 5)
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddFlag("power_focused"),
+                3f, "İlk dönüm noktası", priority: 5);
+            turn10Event.conditions.Add(new Condition
+            {
+                type = ConditionType.TurnCount,
+                conditionOperator = ConditionOperator.Equal,
+                value = 10
+            });
+            events.Add(turn10Event);
+
+            // Tur 25 - Orta oyun değerlendirmesi
+            var turn25Event = CreateEvent("med_turn_25", Era.Medieval, EventCategory.Story, null,
+                "Krallığınız artık olgunlaşıyor. Tarihçiler hükümdarlığınızı kaydetmeye başladı.",
+                new Choice("Mütevazi kal")
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddEffect(ResourceType.Happiness, 5)
+                    .AddFlag("humble_king"),
+                new Choice("Zaferlerini duyur")
+                    .AddEffect(ResourceType.Military, 5)
+                    .AddEffect(ResourceType.Gold, 5)
+                    .AddEffect(ResourceType.Faith, -5)
+                    .AddFlag("proud_king"),
+                3f, "Orta dönem değerlendirmesi", priority: 5);
+            turn25Event.conditions.Add(new Condition
+            {
+                type = ConditionType.TurnCount,
+                conditionOperator = ConditionOperator.Equal,
+                value = 25
+            });
+            events.Add(turn25Event);
+
+            // Tur 50 - Büyük dönüm noktası
+            var turn50Event = CreateEvent("med_turn_50", Era.Medieval, EventCategory.Story, null,
+                "Elli gün tahtta kaldınız! Bu bir başarı. Büyük bir kutlama mı, yoksa gelecek için tasarruf mu?",
+                new Choice("Tasarruf et")
+                    .AddEffect(ResourceType.Gold, 15)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddFlag("wise_decisions"),
+                new Choice("Büyük kutlama")
+                    .AddEffect(ResourceType.Gold, -20)
+                    .AddEffect(ResourceType.Happiness, 20)
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddFlag("generous_king"),
+                3f, "Altın jübile", priority: 5);
+            turn50Event.conditions.Add(new Condition
+            {
+                type = ConditionType.TurnCount,
+                conditionOperator = ConditionOperator.Equal,
+                value = 50
+            });
+            events.Add(turn50Event);
+
+            // Tur 75 - Yaşlılık yaklaşıyor
+            var turn75Event = CreateEvent("med_turn_75", Era.Medieval, EventCategory.Story, null,
+                "Saçlarınız ağardı. Halk sizi 'Yaşlı Bilge' olarak anıyor. Veliaht hazır mı?",
+                new Choice("Veliahdı eğit")
+                    .AddEffect(ResourceType.Military, -5)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddFlag("heir_success")
+                    .AddTriggeredEvent("med_heir_ready"),
+                new Choice("Tahtta kal")
+                    .AddEffect(ResourceType.Military, 5)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddFlag("heir_impatient"),
+                3f, "Yaşlılık", priority: 5);
+            turn75Event.conditions.Add(new Condition
+            {
+                type = ConditionType.TurnCount,
+                conditionOperator = ConditionOperator.Equal,
+                value = 75
+            });
+            events.Add(turn75Event);
+
+            // ============ KARAKTER SON EVENTLERİ (Character Endings) ============
+
+            // Marcus - Sadakat sonu
+            events.Add(CreateEvent("med_marcus_final_loyalty", Era.Medieval, EventCategory.Character, marcus,
+                "Marcus: 'Majeste, yıllardır size hizmet ettim. Son bir isteğim var: Beni baş vezir yapın.'",
+                new Choice("Reddet")
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddFlag("marcus_rejected_final"),
+                new Choice("Baş vezir yap")
+                    .AddEffect(ResourceType.Gold, 15)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddFlag("marcus_loyal"),
+                1f, "Marcus final"));
+
+            // Marcus - İhanet sonu
+            events.Add(CreateEvent("med_marcus_betrayal", Era.Medieval, EventCategory.Character, marcus,
+                "Bir gece Marcus'un odasında şüpheli belgeler buldunuz. Komşu krallıkla yazışıyor!",
+                new Choice("Görmezden gel")
+                    .AddEffect(ResourceType.Gold, -10)
+                    .AddFlag("marcus_spy"),
+                new Choice("Tutukla")
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddEffect(ResourceType.Military, 5)
+                    .AddFlag("marcus_betrayal"),
+                1.5f, "Marcus ihaneti"));
+
+            // Miriam - Ortaklık sonu
+            events.Add(CreateEvent("med_miriam_partnership", Era.Medieval, EventCategory.Character, miriam,
+                "Miriam: 'Majeste, birlikte büyük işler başardık. Resmi ortak olalım mı?'",
+                new Choice("Sadece tüccar kal")
+                    .AddEffect(ResourceType.Gold, 5),
+                new Choice("Ortak ol")
+                    .AddEffect(ResourceType.Gold, 20)
+                    .AddEffect(ResourceType.Faith, -10)
+                    .AddFlag("miriam_partner"),
+                1f, "Miriam ortaklık"));
+
+            // Valerius - Zafer sonu
+            events.Add(CreateEvent("med_valerius_glory", Era.Medieval, EventCategory.Character, valerius,
+                "Valerius büyük zaferi kazandı! 'Majeste, düşman tamamen yenildi. Şanınız sonsuza dek sürecek!'",
+                new Choice("Mütevazi kal")
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddEffect(ResourceType.Military, 5),
+                new Choice("Zafer alayı yap")
+                    .AddEffect(ResourceType.Military, 15)
+                    .AddEffect(ResourceType.Happiness, 15)
+                    .AddEffect(ResourceType.Gold, -15)
+                    .AddFlag("valerius_glory"),
+                1.5f, "Askeri zafer"));
+
+            // Rahip - Kutsama sonu
+            events.Add(CreateEvent("med_priest_blessing", Era.Medieval, EventCategory.Character, highPriest,
+                "Benedictus: 'Majeste, dindarlığınız efsanevi. Sizi kutsamak ve aziz ilan etmek istiyorum.'",
+                new Choice("Çok ileri")
+                    .AddEffect(ResourceType.Faith, 5)
+                    .AddEffect(ResourceType.Happiness, 5),
+                new Choice("Kabul et")
+                    .AddEffect(ResourceType.Faith, 25)
+                    .AddEffect(ResourceType.Happiness, 15)
+                    .AddEffect(ResourceType.Military, -10)
+                    .AddFlag("priest_blessing"),
+                1f, "İlahi kutsama"));
+
+            // Kraliçe - Aşk sonu
+            events.Add(CreateEvent("med_queen_love", Era.Medieval, EventCategory.Character, queen,
+                "Eleanor: 'Sevgili eşim, yıllar geçti ve seni hâlâ seviyorum. Birlikte yaşlandık.'",
+                new Choice("Mesafeli kal")
+                    .AddEffect(ResourceType.Happiness, -5),
+                new Choice("Sevgini göster")
+                    .AddEffect(ResourceType.Happiness, 15)
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddFlag("queen_love"),
+                1f, "Mutlu evlilik"));
+
+            // Veliaht hazır
+            events.Add(CreateEvent("med_heir_ready", Era.Medieval, EventCategory.Chain, heir,
+                "Veliaht Edmund: 'Baba, eğitimim tamamlandı. Tahtı devralabilecek olgunluktayım.'",
+                new Choice("Daha bekle")
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddEffect(ResourceType.Military, 5),
+                new Choice("Bazı görevler ver")
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Gold, 5)
+                    .AddFlag("heir_success"),
+                1f, "Veliaht hazır"));
+
+            // ============ EK RANDOM EVENTLER ============
+
+            // Mevsimsel eventler
+            events.Add(CreateEvent("med_harsh_winter", Era.Medieval, EventCategory.Random, null,
+                "Bu kış çok sert geçiyor. Halk odun ve yiyecek istiyor.",
+                new Choice("Kendi başlarına halletsinler")
+                    .AddEffect(ResourceType.Happiness, -15)
+                    .AddEffect(ResourceType.Faith, -5),
+                new Choice("Yardım gönder")
+                    .AddEffect(ResourceType.Gold, -10)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Faith, 5),
+                1.5f, "Sert kış"));
+
+            events.Add(CreateEvent("med_bountiful_harvest", Era.Medieval, EventCategory.Random, null,
+                "Bu yılın hasadı mükemmel! Ambarlar taşıyor.",
+                new Choice("Stokla")
+                    .AddEffect(ResourceType.Gold, 10)
+                    .AddEffect(ResourceType.Happiness, 5),
+                new Choice("Halka dağıt")
+                    .AddEffect(ResourceType.Happiness, 15)
+                    .AddEffect(ResourceType.Faith, 5)
+                    .AddEffect(ResourceType.Gold, -5),
+                1f, "Bereketli hasat"));
+
+            events.Add(CreateEvent("med_spring_festival", Era.Medieval, EventCategory.Random, null,
+                "Bahar geldi! Halk kutlama yapmak istiyor.",
+                new Choice("İzin verme")
+                    .AddEffect(ResourceType.Happiness, -10),
+                new Choice("Festival düzenle")
+                    .AddEffect(ResourceType.Gold, -5)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Faith, 5),
+                1f, "Bahar festivali"));
+
+            // Diplomatik eventler
+            events.Add(CreateEvent("med_foreign_ambassador", Era.Medieval, EventCategory.Random, null,
+                "Yabancı bir elçi geldi. Ticaret anlaşması öneriyor.",
+                new Choice("Reddet")
+                    .AddEffect(ResourceType.Military, 5)
+                    .AddEffect(ResourceType.Gold, -5),
+                new Choice("Kabul et")
+                    .AddEffect(ResourceType.Gold, 10)
+                    .AddEffect(ResourceType.Military, -5)
+                    .AddFlag("diplomatic_success"),
+                1.5f, "Yabancı elçi"));
+
+            events.Add(CreateEvent("med_marriage_proposal", Era.Medieval, EventCategory.Random, null,
+                "Komşu krallıktan evlilik teklifi geldi. Prensesleri için veliahdinizi istiyorlar.",
+                new Choice("Reddet")
+                    .AddEffect(ResourceType.Military, 5)
+                    .AddEffect(ResourceType.Happiness, -5),
+                new Choice("Kabul et")
+                    .AddEffect(ResourceType.Gold, 15)
+                    .AddEffect(ResourceType.Military, 10)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddFlag("foreign_alliance"),
+                1f, "Evlilik teklifi"));
+
+            events.Add(CreateEvent("med_refugee_crisis", Era.Medieval, EventCategory.Random, null,
+                "Savaştan kaçan mülteciler sınırlarınıza dayandı. Ne yapacaksınız?",
+                new Choice("Geri çevir")
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddEffect(ResourceType.Faith, -10)
+                    .AddEffect(ResourceType.Gold, 5),
+                new Choice("Kabul et")
+                    .AddEffect(ResourceType.Gold, -10)
+                    .AddEffect(ResourceType.Happiness, 5)
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddEffect(ResourceType.Military, 5),
+                1.5f, "Mülteci krizi"));
+
+            // İç politika eventleri
+            events.Add(CreateEvent("med_court_intrigue", Era.Medieval, EventCategory.Random, null,
+                "Sarayda entrikalar dönüyor. Bazı soylular gizli toplantılar yapıyor.",
+                new Choice("Görmezden gel")
+                    .AddEffect(ResourceType.Military, -5)
+                    .AddFlag("noble_conspiracy"),
+                new Choice("Araştır")
+                    .AddEffect(ResourceType.Gold, -5)
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddEffect(ResourceType.Military, 10),
+                1f, "Saray entrikası"));
+
+            events.Add(CreateEvent("med_succession_debate", Era.Medieval, EventCategory.Random, null,
+                "Soyluların bir kısmı veraset yasalarını sorguluyor. Değişiklik mi istiyorlar?",
+                new Choice("Mevcut yasaları koru")
+                    .AddEffect(ResourceType.Faith, 5)
+                    .AddEffect(ResourceType.Happiness, -5),
+                new Choice("Reform yap")
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Faith, -10)
+                    .AddEffect(ResourceType.Military, -5),
+                1f, "Veraset tartışması"));
+
+            events.Add(CreateEvent("med_scholarly_debate", Era.Medieval, EventCategory.Random, null,
+                "Alimler yeni fikirler tartışıyor. Kilise rahatsız, ama ilginç.",
+                new Choice("Yasakla")
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddEffect(ResourceType.Happiness, -5)
+                    .AddEffect(ResourceType.Gold, -5),
+                new Choice("Destekle")
+                    .AddEffect(ResourceType.Gold, 5)
+                    .AddEffect(ResourceType.Happiness, 5)
+                    .AddEffect(ResourceType.Faith, -10),
+                1f, "Bilimsel tartışma"));
+
+            // Felaket eventleri
+            events.Add(CreateEvent("med_earthquake", Era.Medieval, EventCategory.Random, null,
+                "Deprem! Birçok bina yıkıldı, halk panik içinde.",
+                new Choice("Dua et")
+                    .AddEffect(ResourceType.Faith, 10)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddEffect(ResourceType.Gold, -5),
+                new Choice("Yeniden inşa et")
+                    .AddEffect(ResourceType.Gold, -15)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddEffect(ResourceType.Military, 5),
+                2f, "Deprem", priority: 2));
+
+            events.Add(CreateEvent("med_great_fire", Era.Medieval, EventCategory.Random, null,
+                "Büyük yangın! Şehrin bir bölümü kül oldu.",
+                new Choice("Kadere bırak")
+                    .AddEffect(ResourceType.Happiness, -15)
+                    .AddEffect(ResourceType.Faith, -5),
+                new Choice("İtfaiye örgütle")
+                    .AddEffect(ResourceType.Gold, -10)
+                    .AddEffect(ResourceType.Happiness, 5)
+                    .AddEffect(ResourceType.Military, 5),
+                1.5f, "Büyük yangın", priority: 1));
+
+            events.Add(CreateEvent("med_flood", Era.Medieval, EventCategory.Random, null,
+                "Sel baskını! Nehir kenarındaki köyler sular altında.",
+                new Choice("İlahi ceza")
+                    .AddEffect(ResourceType.Faith, 5)
+                    .AddEffect(ResourceType.Happiness, -10),
+                new Choice("Kurtarma ekibi gönder")
+                    .AddEffect(ResourceType.Gold, -10)
+                    .AddEffect(ResourceType.Military, -5)
+                    .AddEffect(ResourceType.Happiness, 15)
+                    .AddEffect(ResourceType.Faith, 10),
+                1.5f, "Sel baskını"));
+
+            // ============ NADİR SON TRIGGER EVENTLERİ ============
+
+            // Ejderha zaferi sonucu
+            events.Add(CreateEvent("med_dragon_victory", Era.Medieval, EventCategory.Chain, null,
+                "Şövalyeniz ejderhayı devirdi! Altın hazinesi ve efsanevi şan kazandınız!",
+                new Choice("Hazineyi paylaş")
+                    .AddEffect(ResourceType.Gold, 15)
+                    .AddEffect(ResourceType.Happiness, 20)
+                    .AddFlag("dragon_slayer"),
+                new Choice("Hepsini al")
+                    .AddEffect(ResourceType.Gold, 30)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddEffect(ResourceType.Faith, -10)
+                    .AddFlag("dragon_slayer"),
+                1f, "Ejderha zaferi"));
+
+            // Kutsal Kase etkisi
+            events.Add(CreateEvent("med_grail_power", Era.Medieval, EventCategory.Chain, null,
+                "Kutsal Kase mucizeler yaratıyor. Tüm Hristiyan dünyası size bakıyor.",
+                new Choice("Mütevazi kal")
+                    .AddEffect(ResourceType.Faith, 20)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddFlag("grail_found"),
+                new Choice("Gücü kullan")
+                    .AddEffect(ResourceType.Faith, 30)
+                    .AddEffect(ResourceType.Military, 15)
+                    .AddEffect(ResourceType.Happiness, -10)
+                    .AddFlag("grail_found"),
+                1f, "Kase gücü"));
+
+            // Zaman yolcusu etkisi
+            events.Add(CreateEvent("med_time_traveler_proof", Era.Medieval, EventCategory.Chain, null,
+                "Zaman yolcusunun uyarısı gerçek çıktı! Büyük krizi önlediniz.",
+                new Choice("Sessiz kal")
+                    .AddEffect(ResourceType.Happiness, 5)
+                    .AddFlag("time_saved"),
+                new Choice("Herkese anlat")
+                    .AddEffect(ResourceType.Faith, -15)
+                    .AddEffect(ResourceType.Happiness, 10)
+                    .AddFlag("time_saved"),
+                1f, "Zaman ispatı"));
+
             return events;
         }
         #endregion

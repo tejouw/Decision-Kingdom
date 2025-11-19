@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DecisionKingdom.Core;
 using DecisionKingdom.Managers;
+using DecisionKingdom.Systems;
 
 namespace DecisionKingdom.UI
 {
@@ -14,9 +15,11 @@ namespace DecisionKingdom.UI
         [SerializeField] private GameObject _gameOverPanel;
         [SerializeField] private Text _titleText;
         [SerializeField] private Text _reasonText;
+        [SerializeField] private Text _epilogueText;
         [SerializeField] private Text _turnCountText;
         [SerializeField] private Text _prestigePointsText;
         [SerializeField] private Text _resourceSummaryText;
+        [SerializeField] private Text _legacyText;
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _mainMenuButton;
         [SerializeField] private Button _shareButton;
@@ -119,18 +122,69 @@ namespace DecisionKingdom.UI
         #region Private Methods
         private void UpdateUI(GameOverReason reason)
         {
+            // Ending sisteminden son tipini al
+            EndingType endingType = EndingType.None;
+            EndingSystem.EndingData endingData = null;
+
+            if (GameManager.Instance != null)
+            {
+                var gameState = GameManager.Instance.CurrentGameState;
+
+                // Eğer oyun durumunda ending set edilmişse onu kullan
+                if (gameState.endingType != EndingType.None)
+                {
+                    endingType = gameState.endingType;
+                }
+                else
+                {
+                    // GameOverReason'dan dönüştür veya belirle
+                    endingType = reason != GameOverReason.None
+                        ? EndingSystem.GetEndingFromGameOver(reason)
+                        : EndingSystem.DetermineEnding(gameState);
+                }
+
+                endingData = EndingSystem.GetEnding(endingType);
+            }
+
             // Başlık
             if (_titleText != null)
             {
-                _titleText.text = reason == GameOverReason.None
-                    ? "ZAFERİNİ İLAN ETTİN!"
-                    : "KRALIKLIK ÇÖKTÜ!";
+                if (endingData != null)
+                {
+                    _titleText.text = endingData.title;
+                }
+                else
+                {
+                    _titleText.text = reason == GameOverReason.None
+                        ? "ZAFERİNİ İLAN ETTİN!"
+                        : "KRALLIK ÇÖKTÜ!";
+                }
             }
 
-            // Sebep
+            // Sebep/Açıklama
             if (_reasonText != null)
             {
-                _reasonText.text = GetReasonText(reason);
+                if (endingData != null)
+                {
+                    _reasonText.text = endingData.description;
+                }
+                else
+                {
+                    _reasonText.text = GetReasonText(reason);
+                }
+            }
+
+            // Epilog
+            if (_epilogueText != null)
+            {
+                if (endingData != null)
+                {
+                    _epilogueText.text = endingData.epilogue;
+                }
+                else
+                {
+                    _epilogueText.text = "";
+                }
             }
 
             // Tur sayısı
@@ -140,11 +194,21 @@ namespace DecisionKingdom.UI
                 _turnCountText.text = $"Hayatta Kalınan Tur: {turns}";
             }
 
-            // Prestige puanı
+            // Prestige puanı (ending bonusu dahil)
             if (_prestigePointsText != null && GameManager.Instance != null)
             {
-                int pp = GameManager.Instance.CalculatePrestigePoints();
-                _prestigePointsText.text = $"Kazanılan PP: {pp}";
+                int basePP = GameManager.Instance.CalculatePrestigePoints();
+                int endingBonus = endingData != null ? endingData.prestigeBonus : 0;
+                int totalPP = basePP + endingBonus;
+
+                if (endingBonus > 0)
+                {
+                    _prestigePointsText.text = $"Kazanılan PP: {totalPP} (+{endingBonus} bonus)";
+                }
+                else
+                {
+                    _prestigePointsText.text = $"Kazanılan PP: {totalPP}";
+                }
             }
 
             // Kaynak özeti
@@ -153,6 +217,23 @@ namespace DecisionKingdom.UI
                 var res = ResourceManager.Instance.CurrentResources;
                 _resourceSummaryText.text = $"Para: {res.Gold} | Mutluluk: {res.Happiness}\n" +
                                            $"Askeri: {res.Military} | İnanç: {res.Faith}";
+            }
+
+            // Miras bilgisi
+            if (_legacyText != null && GameManager.Instance != null)
+            {
+                var gameState = GameManager.Instance.CurrentGameState;
+                var legacyType = LegacySystem.DetermineLegacy(gameState);
+                var legacyData = LegacySystem.GetLegacy(legacyType);
+
+                if (legacyData != null)
+                {
+                    _legacyText.text = $"Miras: {legacyData.title}\n{legacyData.description}";
+                }
+                else
+                {
+                    _legacyText.text = "";
+                }
             }
         }
 
