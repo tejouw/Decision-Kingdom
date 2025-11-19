@@ -483,3 +483,22 @@ Oyuncu Decision Kingdom'ı açıyor:
 - **100. Oyun:** "O nadir 'Ejderha' event'ini hala görmedim, bulacağım!"
 
 **Bu oyunun gücü:** Basit mekanik, derin duygusal deneyim, sonsuz hikaye olasılığı.
+
+---
+
+## Teknik Platform
+
+### Geliştirme Ortamı
+- **Motor:** Unity 2022 LTS+
+- **Programlama Dili:** C#
+- **Hedef Platformlar:** iOS, Android, PC (Steam)
+
+### Unity Avantajları
+- Cross-platform deployment
+- Güçlü 2D/UI araçları
+- Asset Store desteği
+- Geniş topluluk ve dokümantasyon
+- Built-in monetization araçları
+
+### Proje Durumu
+Bu proje C# ve Unity ile sıfırdan geliştirilmektedir. Mevcut TypeScript/Web implementasyonu kaldırılmış olup, Unity projesine geçiş yapılmaktadır.
