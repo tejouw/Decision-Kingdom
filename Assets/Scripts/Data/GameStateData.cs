@@ -37,6 +37,12 @@ namespace DecisionKingdom.Data
         [Tooltip("Game Over sebebi")]
         public GameOverReason gameOverReason;
 
+        [Tooltip("Son tipi")]
+        public EndingType endingType;
+
+        [Tooltip("Miras tipi")]
+        public LegacyType legacyType;
+
         [Tooltip("Başlangıç kaynakları (istatistik için)")]
         public Resources startingResources;
 
@@ -54,6 +60,8 @@ namespace DecisionKingdom.Data
             triggeredEventQueue = new Queue<string>();
             gameState = GameState.MainMenu;
             gameOverReason = GameOverReason.None;
+            endingType = EndingType.None;
+            legacyType = LegacyType.None;
             startingResources = new Resources();
             sessionStartTime = System.DateTime.Now;
         }
@@ -82,6 +90,8 @@ namespace DecisionKingdom.Data
             triggeredEventQueue.Clear();
             gameState = GameState.Playing;
             gameOverReason = GameOverReason.None;
+            endingType = EndingType.None;
+            legacyType = LegacyType.None;
             sessionStartTime = System.DateTime.Now;
         }
 
