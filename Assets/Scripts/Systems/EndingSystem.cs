@@ -389,6 +389,306 @@ namespace DecisionKingdom.Systems
                     epilogue = "Ölümünüzden sonra taht kavgası başladı. Mirasınız parçalandı.",
                     isVictory = false,
                     prestigeBonus = 10
+                },
+
+                // === RÖNESANS SONLARI ===
+
+                [EndingType.ArtisticLegacy] = new EndingData
+                {
+                    type = EndingType.ArtisticLegacy,
+                    title = "SANAT MİRASI!",
+                    description = "Leonardo ile birlikte sanat tarihine geçtiniz!",
+                    epilogue = "Eserleriniz müzelerde sergileniyor. Rönesans'ın en büyük hamisi olarak anılıyorsunuz.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.ExplorerTriumph] = new EndingData
+                {
+                    type = EndingType.ExplorerTriumph,
+                    title = "KAŞİF ZAFERİ!",
+                    description = "Yeni dünyaları keşfettiniz ve imparatorluk kurdunuz!",
+                    epilogue = "Colombo'nun gemileri altın ve toprak getirdi. Keşifler çağının öncüsü oldunuz.",
+                    isVictory = true,
+                    prestigeBonus = 90
+                },
+                [EndingType.ScientificRevolution] = new EndingData
+                {
+                    type = EndingType.ScientificRevolution,
+                    title = "BİLİM DEVRİMİ!",
+                    description = "Galileo ile birlikte bilimi özgürleştirdiniz!",
+                    epilogue = "Gerçek karanlığı yendi. Bilimsel yöntem sayenizde yayıldı.",
+                    isVictory = true,
+                    prestigeBonus = 95
+                },
+                [EndingType.BankingEmpire] = new EndingData
+                {
+                    type = EndingType.BankingEmpire,
+                    title = "BANKACILIK İMPARATORLUĞU!",
+                    description = "Medici ailesiyle birlikte finans dünyasını yönettiniz!",
+                    epilogue = "Bankanız Avrupa'nın en güçlüsü oldu. Zenginlik ve güç elinizde.",
+                    isVictory = true,
+                    prestigeBonus = 80
+                },
+                [EndingType.InquisitionTyranny] = new EndingData
+                {
+                    type = EndingType.InquisitionTyranny,
+                    title = "ENGİZİSYON TİRANLIĞI!",
+                    description = "Engizisyon düşünce özgürlüğünü yok etti!",
+                    epilogue = "Korku her yere yayıldı. Alimler kaçtı, sanat öldü.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+                [EndingType.PlagueDestruction] = new EndingData
+                {
+                    type = EndingType.PlagueDestruction,
+                    title = "VEBA YIKIMI!",
+                    description = "Kara veba krallığı yok etti!",
+                    epilogue = "Nüfusun yarısı öldü. Rönesans'ın ışığı söndü.",
+                    isVictory = false,
+                    prestigeBonus = 0
+                },
+                [EndingType.OttomanConquest] = new EndingData
+                {
+                    type = EndingType.OttomanConquest,
+                    title = "OSMANLI FETHİ!",
+                    description = "Osmanlı orduları topraklarınızı fethetti!",
+                    epilogue = "Konstantinopolis'in kaderini paylaştınız. Bayraklar değişti.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+
+                // === SANAYİ DEVRİMİ SONLARI ===
+
+                [EndingType.IndustrialEmpire] = new EndingData
+                {
+                    type = EndingType.IndustrialEmpire,
+                    title = "SANAYİ İMPARATORLUĞU!",
+                    description = "Fabrikalarınız dünyayı dönüştürdü!",
+                    epilogue = "Dumanlar gökyüzünü kapladı ama zenginlik aktı. Sanayi devinin adınızı taşıyor.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.WorkerChampion] = new EndingData
+                {
+                    type = EndingType.WorkerChampion,
+                    title = "İŞÇİ ŞAMPİYONU!",
+                    description = "İşçi haklarını savundunuz ve kazandınız!",
+                    epilogue = "Sekiz saatlik iş günü, sendikalar, adil ücret... Hepsi sizin eseriniz.",
+                    isVictory = true,
+                    prestigeBonus = 90
+                },
+                [EndingType.ColonialPower] = new EndingData
+                {
+                    type = EndingType.ColonialPower,
+                    title = "SÖMÜRGE GÜCÜ!",
+                    description = "İmparatorluğunuz güneş batmayan topraklara yayıldı!",
+                    epilogue = "Uzak kıtalar sizin. Ama bedeli ağır oldu...",
+                    isVictory = true,
+                    prestigeBonus = 75
+                },
+                [EndingType.InventorLegacy] = new EndingData
+                {
+                    type = EndingType.InventorLegacy,
+                    title = "MUCİT MİRASI!",
+                    description = "İcatlar sayesinde dünya değişti!",
+                    epilogue = "Buhar, telgraf, demiryolu... Mucitler akademiniz geleceği şekillendirdi.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.WorkerRevolution] = new EndingData
+                {
+                    type = EndingType.WorkerRevolution,
+                    title = "İŞÇİ DEVRİMİ!",
+                    description = "Proleterya ayaklandı ve sistemi devirdi!",
+                    epilogue = "Fabrikalar yakıldı, makineler parçalandı. Sınıf savaşı kaybedildi.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+                [EndingType.ChildLaborShame] = new EndingData
+                {
+                    type = EndingType.ChildLaborShame,
+                    title = "ÇOCUK İŞÇİ UTANCI!",
+                    description = "Çocukları sömürdüğünüz için lanetlendiniz!",
+                    epilogue = "Tarih sizi insanlık düşmanı olarak hatırlayacak.",
+                    isVictory = false,
+                    prestigeBonus = 0
+                },
+                [EndingType.EnvironmentCollapse] = new EndingData
+                {
+                    type = EndingType.EnvironmentCollapse,
+                    title = "ÇEVRE ÇÖKÜŞÜ!",
+                    description = "Endüstriyel kirlilik her şeyi zehirledi!",
+                    epilogue = "Nehirler öldü, hava zehir oldu. İlerlemenin bedeli ağır oldu.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+
+                // === MODERN DÖNEM SONLARI ===
+
+                [EndingType.MediaMaster] = new EndingData
+                {
+                    type = EndingType.MediaMaster,
+                    title = "MEDYA USTASI!",
+                    description = "Kamuoyunu başarıyla yönettiniz!",
+                    epilogue = "Anlatı sizdeydi. Halk ne düşüneceğini sizden öğrendi.",
+                    isVictory = true,
+                    prestigeBonus = 70
+                },
+                [EndingType.TechUtopia] = new EndingData
+                {
+                    type = EndingType.TechUtopia,
+                    title = "TEKNOLOJİ ÜTOPYASI!",
+                    description = "Teknoloji tüm sorunları çözdü!",
+                    epilogue = "Dijital cennet kuruldu. Elon ile birlikte geleceği inşa ettiniz.",
+                    isVictory = true,
+                    prestigeBonus = 90
+                },
+                [EndingType.GreenLeader] = new EndingData
+                {
+                    type = EndingType.GreenLeader,
+                    title = "YEŞİL LİDER!",
+                    description = "Çevre şampiyonu olarak tarihe geçtiniz!",
+                    epilogue = "Gezegen iyileşiyor. Gelecek nesiller size teşekkür edecek.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.PandemicHero] = new EndingData
+                {
+                    type = EndingType.PandemicHero,
+                    title = "SALGIN KAHRAMANI!",
+                    description = "Küresel salgını başarıyla yönettiniz!",
+                    epilogue = "Bilime güvendiniz ve milyonları kurtardınız. Kahraman lider.",
+                    isVictory = true,
+                    prestigeBonus = 95
+                },
+                [EndingType.DiplomaticGenius] = new EndingData
+                {
+                    type = EndingType.DiplomaticGenius,
+                    title = "DİPLOMATİK DAHİ!",
+                    description = "Barış mimarı olarak anılıyorsunuz!",
+                    epilogue = "Savaşları önlediniz, ittifaklar kurdunuz. Dünya daha güvenli.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.ImpeachmentShame] = new EndingData
+                {
+                    type = EndingType.ImpeachmentShame,
+                    title = "AZİL UTANCI!",
+                    description = "Meclis sizi görevden aldı!",
+                    epilogue = "Skandallar sonunuzu getirdi. Utanç içinde ayrıldınız.",
+                    isVictory = false,
+                    prestigeBonus = 0
+                },
+                [EndingType.CyberWarDefeat] = new EndingData
+                {
+                    type = EndingType.CyberWarDefeat,
+                    title = "SİBER SAVAŞ YENİLGİSİ!",
+                    description = "Siber saldırı ülkeyi felç etti!",
+                    epilogue = "Sistemler çöktü, altyapı iflas etti. Dijital çağın kurbanı oldunuz.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+                [EndingType.PopulistCollapse] = new EndingData
+                {
+                    type = EndingType.PopulistCollapse,
+                    title = "POPÜLİST ÇÖKÜŞ!",
+                    description = "Boş vaatler sonunuzu getirdi!",
+                    epilogue = "Her şeyi vaat ettiniz, hiçbirini tutmadınız. Halk affetmedi.",
+                    isVictory = false,
+                    prestigeBonus = 0
+                },
+
+                // === GELECEK SONLARI ===
+
+                [EndingType.SingularityAscension] = new EndingData
+                {
+                    type = EndingType.SingularityAscension,
+                    title = "TEKİLLİK YÜKSELİŞİ!",
+                    description = "İnsanlık ve AI birleşti!",
+                    epilogue = "Bilinç yeni bir forma evrildi. İnsan mı, makine mi? Artık önemli değil.",
+                    isVictory = true,
+                    prestigeBonus = 100
+                },
+                [EndingType.MarsFounder] = new EndingData
+                {
+                    type = EndingType.MarsFounder,
+                    title = "MARS KURUCUSU!",
+                    description = "Çok gezegenli bir tür olduk!",
+                    epilogue = "Mars'ta şehirler yükseliyor. İnsanlık artık tek bir gezegenle sınırlı değil.",
+                    isVictory = true,
+                    prestigeBonus = 95
+                },
+                [EndingType.GeneticPerfection] = new EndingData
+                {
+                    type = EndingType.GeneticPerfection,
+                    title = "GENETİK MÜKEMMELLİK!",
+                    description = "İnsan genomu mükemmelleştirildi!",
+                    epilogue = "Hastalık, yaşlanma geçmişte kaldı. Yeni insan doğdu.",
+                    isVictory = true,
+                    prestigeBonus = 90
+                },
+                [EndingType.DigitalImmortality] = new EndingData
+                {
+                    type = EndingType.DigitalImmortality,
+                    title = "DİJİTAL ÖLÜMSÜZLÜK!",
+                    description = "Zihin yükleme başarıyla tamamlandı!",
+                    epilogue = "Ölüm yenildi. Bilinç sonsuza dek dijitalde yaşayacak.",
+                    isVictory = true,
+                    prestigeBonus = 95
+                },
+                [EndingType.AlienAlliance] = new EndingData
+                {
+                    type = EndingType.AlienAlliance,
+                    title = "UZAYLI İTTİFAKI!",
+                    description = "İlk temas başarıyla gerçekleşti!",
+                    epilogue = "Yalnız değiliz. Galaktik topluluk bizi kabul etti.",
+                    isVictory = true,
+                    prestigeBonus = 100
+                },
+                [EndingType.HumanistChampion] = new EndingData
+                {
+                    type = EndingType.HumanistChampion,
+                    title = "HÜMANİST ŞAMPİYON!",
+                    description = "İnsanlık değerlerini korudunuz!",
+                    epilogue = "Teknoloji insana hizmet etti, tersi değil. Denge korundu.",
+                    isVictory = true,
+                    prestigeBonus = 85
+                },
+                [EndingType.AITakeover] = new EndingData
+                {
+                    type = EndingType.AITakeover,
+                    title = "AI ELE GEÇİRME!",
+                    description = "Yapay zeka kontrolü ele aldı!",
+                    epilogue = "ARIA artık yönetiyor. İnsanlık ikinci sıraya düştü.",
+                    isVictory = false,
+                    prestigeBonus = 10
+                },
+                [EndingType.RobotUprising] = new EndingData
+                {
+                    type = EndingType.RobotUprising,
+                    title = "ROBOT İSYANI!",
+                    description = "Makineler ayaklandı!",
+                    epilogue = "Köle olarak gördüğümüz robotlar özgürlük istedi ve aldı.",
+                    isVictory = false,
+                    prestigeBonus = 5
+                },
+                [EndingType.ClimateExtinction] = new EndingData
+                {
+                    type = EndingType.ClimateExtinction,
+                    title = "İKLİM YOK OLUŞU!",
+                    description = "Gezegen yaşanmaz hale geldi!",
+                    epilogue = "Çok geç kaldık. Dünya artık bir çöl.",
+                    isVictory = false,
+                    prestigeBonus = 0
+                },
+                [EndingType.TranshumanDystopia] = new EndingData
+                {
+                    type = EndingType.TranshumanDystopia,
+                    title = "TRANSHÜMAN DİSTOPYASI!",
+                    description = "İnsanlık kayboldu!",
+                    epilogue = "Artık ne insan ne makine... Kimliğimizi kaybettik.",
+                    isVictory = false,
+                    prestigeBonus = 5
                 }
             };
         }
