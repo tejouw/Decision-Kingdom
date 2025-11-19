@@ -109,6 +109,7 @@ export interface Card {
   isRepeatable?: boolean;    // Tekrar oynanabilir mi?
   cooldown?: number;         // Kaç tur sonra tekrar çıkabilir
   memoryText?: string;       // Karakter hatırlama metni
+  era?: Era;                 // Kartın ait olduğu dönem
 }
 
 // Kaynaklar

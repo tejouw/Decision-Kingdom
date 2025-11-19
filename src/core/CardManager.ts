@@ -146,6 +146,11 @@ export class CardManager {
     era: Era
   ): Card[] {
     return this.cards.filter(card => {
+      // Era kontrolü - kart belirli bir era'ya aitse, sadece o era'da görünür
+      if (card.era && card.era !== era) {
+        return false;
+      }
+
       // Cooldown kontrolü
       const cooldownEnd = this.cardCooldowns.get(card.id);
       if (cooldownEnd && turn < cooldownEnd) {
