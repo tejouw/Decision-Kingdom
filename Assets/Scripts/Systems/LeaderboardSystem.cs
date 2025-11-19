@@ -139,10 +139,11 @@ namespace DecisionKingdom.Systems
         {
             DateTime weekStart = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
 
+            // Optimized: Use MaxBy pattern instead of OrderByDescending().First()
             return _data.dailyEntries
                 .Where(e => e.timestamp >= weekStart)
                 .GroupBy(e => e.playerName)
-                .Select(g => g.OrderByDescending(e => e.score).First())
+                .Select(g => g.Aggregate((max, e) => e.score > max.score ? e : max))
                 .OrderByDescending(e => e.score)
                 .Take(count)
                 .ToList();
@@ -387,15 +388,41 @@ namespace DecisionKingdom.Systems
                 {
                     var saveData = JsonUtility.FromJson<LeaderboardSaveData>(json);
 
-                    _data.personalBest = saveData.personalBest;
-                    _data.personalBestDate = DateTime.Parse(saveData.personalBestDate);
-                    _data.totalSubmissions = saveData.totalSubmissions;
-                    _data.dailyEntries = saveData.dailyEntries ?? new List<LeaderboardEntry>();
-                    _data.personalBests = saveData.personalBests ?? new List<LeaderboardEntry>();
-                    _data.allTimeEntries = saveData.allTimeEntries ?? new List<LeaderboardEntry>();
+                    if (saveData != null)
+                    {
+                        _data.personalBest = saveData.personalBest;
+                        _data.totalSubmissions = saveData.totalSubmissions;
+                        _data.dailyEntries = saveData.dailyEntries ?? new List<LeaderboardEntry>();
+                        _data.personalBests = saveData.personalBests ?? new List<LeaderboardEntry>();
+                        _data.allTimeEntries = saveData.allTimeEntries ?? new List<LeaderboardEntry>();
+
+                        // Safe date parsing
+                        if (!string.IsNullOrEmpty(saveData.personalBestDate))
+                        {
+                            if (DateTime.TryParse(saveData.personalBestDate, out DateTime parsedDate))
+                            {
+                                _data.personalBestDate = parsedDate;
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"[LeaderboardSystem] Invalid date format: {saveData.personalBestDate}");
+                                _data.personalBestDate = DateTime.MinValue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _data = new LeaderboardData();
+                    }
                 }
-                catch
+                catch (ArgumentException ex)
                 {
+                    Debug.LogWarning($"[LeaderboardSystem] JSON parse hatası: {ex.Message}");
+                    _data = new LeaderboardData();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[LeaderboardSystem] Yükleme hatası: {ex.Message}");
                     _data = new LeaderboardData();
                 }
             }

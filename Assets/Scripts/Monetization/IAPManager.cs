@@ -57,23 +57,37 @@ namespace DecisionKingdom.Monetization
         /// </summary>
         private void InitializePlatformSDK()
         {
-            // TODO: Initialize Unity IAP or platform-specific SDK
-            // Unity IAP initialization would go here:
-            // - iOS StoreKit
-            // - Google Play Billing
-            // - Steam API
+            // Unity IAP initialization
+            // To enable actual purchases, add Unity IAP package and uncomment the relevant code
+            // Package: com.unity.purchasing
 
 #if UNITY_EDITOR
             Debug.Log("[IAPManager] Running in Editor - IAP simulation mode");
+            // Editor mode: purchases are simulated for testing
 #elif UNITY_IOS
-            Debug.Log("[IAPManager] Initializing iOS StoreKit");
-            // Initialize iOS IAP
+            Debug.Log("[IAPManager] iOS StoreKit - SDK integration pending");
+            // For iOS integration:
+            // 1. Add Unity IAP package
+            // 2. Configure App Store Connect
+            // 3. Add product IDs to IAP catalog
+            // 4. Implement IStoreListener interface
+            // Example: UnityPurchasing.Initialize(this, builder);
 #elif UNITY_ANDROID
-            Debug.Log("[IAPManager] Initializing Google Play Billing");
-            // Initialize Android IAP
+            Debug.Log("[IAPManager] Google Play Billing - SDK integration pending");
+            // For Android integration:
+            // 1. Add Unity IAP package
+            // 2. Configure Google Play Console
+            // 3. Add license key to Unity IAP settings
+            // 4. Implement IStoreListener interface
+            // Example: UnityPurchasing.Initialize(this, builder);
 #elif UNITY_STANDALONE
-            Debug.Log("[IAPManager] Initializing Steam API");
-            // Initialize Steam IAP
+            Debug.Log("[IAPManager] Steam API - SDK integration pending");
+            // For Steam integration:
+            // 1. Add Steamworks.NET
+            // 2. Configure Steamworks app
+            // 3. Implement Steam overlay callbacks
+#else
+            Debug.LogWarning("[IAPManager] No IAP SDK available for this platform");
 #endif
         }
 
@@ -135,10 +149,22 @@ namespace DecisionKingdom.Monetization
         /// </summary>
         private void StartPlatformPurchase(string productId, IAPProductType productType)
         {
-            // TODO: Implement actual platform purchase
-            // Unity IAP: UnityPurchasing.Buy(productId);
+            // Platform purchase implementation
+            // When Unity IAP is integrated, this will initiate the actual purchase
 
             Debug.Log($"[IAPManager] Starting platform purchase: {productId}");
+
+#if UNITY_EDITOR
+            // Editor: simulate purchase (already handled by SimulatePurchase)
+            Debug.LogWarning("[IAPManager] Platform purchase called in editor - use SimulatePurchase instead");
+#else
+            // Production: initiate store purchase
+            // With Unity IAP: _storeController.InitiatePurchase(productId);
+
+            // For now, log that SDK integration is needed
+            Debug.LogError($"[IAPManager] SDK not integrated - cannot process purchase: {productId}");
+            ProcessFailedPurchase(productType, "IAP SDK not integrated. Please add Unity IAP package.");
+#endif
         }
 
         /// <summary>
@@ -243,9 +269,29 @@ namespace DecisionKingdom.Monetization
 
         private void RestoreiOSPurchases()
         {
-            // TODO: Implement iOS restore
-            // StoreKit.RestoreCompletedTransactions();
+            // iOS restore purchases implementation
+            // With Unity IAP: _appleExtensions.RestoreTransactions(OnTransactionsRestored);
+
             Debug.Log("[IAPManager] Restoring iOS purchases");
+
+#if UNITY_IOS && !UNITY_EDITOR
+            // Production iOS: restore via App Store
+            // When Unity IAP is integrated:
+            // var apple = _extensionProvider.GetExtension<IAppleExtensions>();
+            // apple.RestoreTransactions(result => {
+            //     if (result) OnPurchasesRestored?.Invoke();
+            // });
+
+            Debug.LogWarning("[IAPManager] iOS restore - SDK integration pending");
+
+            // For now, reload local purchases as fallback
+            LoadPurchases();
+            OnPurchasesRestored?.Invoke();
+#else
+            // Non-iOS or Editor: just reload local data
+            LoadPurchases();
+            OnPurchasesRestored?.Invoke();
+#endif
         }
 
         #endregion

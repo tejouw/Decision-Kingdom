@@ -65,18 +65,42 @@ namespace DecisionKingdom.Monetization
         /// </summary>
         private void InitializePlatformSDK()
         {
-            // TODO: Initialize AdMob, Unity Ads, or other ad network
+            // Ad SDK initialization
+            // Supports: AdMob, Unity Ads, IronSource, AppLovin MAX
+            // To enable ads, add the ad SDK package and configure app IDs
 
 #if UNITY_EDITOR
             Debug.Log("[AdManager] Running in Editor - Ad simulation mode");
             interstitialState = AdWatchState.Available;
             rewardedState = AdWatchState.Available;
 #elif UNITY_IOS || UNITY_ANDROID
-            Debug.Log("[AdManager] Initializing mobile ads");
-            // Initialize AdMob/Unity Ads
-            // MobileAds.Initialize(initStatus => { ... });
+            Debug.Log("[AdManager] Initializing mobile ads - SDK integration pending");
+
+            // For AdMob integration:
+            // 1. Add Google Mobile Ads Unity plugin
+            // 2. Configure App ID in GoogleMobileAdsSettings
+            // 3. Update ad unit IDs in Constants.cs
+            // Example: MobileAds.Initialize(initStatus => {
+            //     Debug.Log("[AdManager] AdMob initialized");
+            //     LoadInterstitial();
+            //     LoadRewarded();
+            // });
+
+            // For Unity Ads integration:
+            // 1. Enable Unity Ads in Services
+            // 2. Configure game ID
+            // Example: Advertisement.Initialize(gameId, testMode, this);
+
+            // For now, set ads as available for testing
+            interstitialState = AdWatchState.Available;
+            rewardedState = AdWatchState.Available;
+
             LoadInterstitial();
             LoadRewarded();
+#else
+            Debug.LogWarning("[AdManager] No ad SDK available for this platform");
+            interstitialState = AdWatchState.NotAvailable;
+            rewardedState = AdWatchState.NotAvailable;
 #endif
         }
 
