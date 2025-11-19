@@ -6,7 +6,9 @@ import {
   RESOURCE_ICONS,
   GameStatus,
   Choice,
-  ResourceEffect
+  ResourceEffect,
+  GameEndReport,
+  Achievement
 } from '../models/types.js';
 import { GameManager } from '../core/GameManager.js';
 import { SwipeHandler } from './SwipeHandler.js';
@@ -22,6 +24,7 @@ export class GameUI {
   private choicePreview: HTMLElement | null = null;
   private turnDisplay: HTMLElement | null = null;
   private scoreDisplay: HTMLElement | null = null;
+  private ppDisplay: HTMLElement | null = null;
 
   constructor(containerId: string, gameManager: GameManager) {
     const container = document.getElementById(containerId);
@@ -71,10 +74,11 @@ export class GameUI {
           <div class="turn-score">
             <span id="turn-display">Tur: 1</span>
             <span id="score-display">Skor: 0</span>
+            <span id="pp-display" class="pp-display">PP: ${this.gameManager.getCurrentPP()}</span>
           </div>
           <div class="menu-buttons">
             <button id="save-btn" class="menu-btn">Kaydet</button>
-            <button id="menu-btn" class="menu-btn">Menü</button>
+            <button id="menu-btn" class="menu-btn">Menu</button>
           </div>
         </div>
 
@@ -146,6 +150,7 @@ export class GameUI {
     this.choicePreview = document.getElementById('choice-preview');
     this.turnDisplay = document.getElementById('turn-display');
     this.scoreDisplay = document.getElementById('score-display');
+    this.ppDisplay = document.getElementById('pp-display');
 
     // Resource bars
     for (const type of Object.values(ResourceType)) {
@@ -153,6 +158,12 @@ export class GameUI {
       if (bar) {
         this.resourceBars.set(type, bar);
       }
+    }
+  }
+
+  private updatePPDisplay(): void {
+    if (this.ppDisplay) {
+      this.ppDisplay.textContent = `PP: ${this.gameManager.getCurrentPP()}`;
     }
   }
 
@@ -343,8 +354,24 @@ export class GameUI {
 
     if (overlay) overlay.style.display = 'flex';
     if (title) title.textContent = 'Oyun Bitti!';
-    if (message) message.textContent = data.reason;
+
+    // Ending bilgisini göster
+    let messageText = data.reason;
+    if (data.ending) {
+      messageText += `\n\n<strong>${data.ending.title}</strong>\n${data.ending.description}`;
+    }
+
+    // Game end report bilgilerini göster
+    if (data.gameEndReport) {
+      const report = data.gameEndReport as GameEndReport;
+      messageText += this.formatGameEndReport(report);
+    }
+
+    if (message) message.innerHTML = messageText.replace(/\n/g, '<br>');
     if (stats) stats.textContent = `Tur: ${data.turn} | Skor: ${data.score}`;
+
+    // PP display'i güncelle
+    this.updatePPDisplay();
   }
 
   private showVictory(data: any): void {
@@ -355,8 +382,63 @@ export class GameUI {
 
     if (overlay) overlay.style.display = 'flex';
     if (title) title.textContent = 'Zafer!';
-    if (message) message.textContent = 'Tüm kartları tamamladınız!';
+
+    // Ending bilgisini göster
+    let messageText = 'Tum kartlari tamamladiniz!';
+    if (data.ending) {
+      messageText += `\n\n<strong>${data.ending.title}</strong>\n${data.ending.description}`;
+    }
+
+    // Game end report bilgilerini göster
+    if (data.gameEndReport) {
+      const report = data.gameEndReport as GameEndReport;
+      messageText += this.formatGameEndReport(report);
+    }
+
+    if (message) message.innerHTML = messageText.replace(/\n/g, '<br>');
     if (stats) stats.textContent = `Tur: ${data.turn} | Skor: ${data.score}`;
+
+    // PP display'i güncelle
+    this.updatePPDisplay();
+  }
+
+  private formatGameEndReport(report: GameEndReport): string {
+    let text = '\n\n--- Prestij Puanlari ---';
+
+    // PP hesaplaması
+    const pp = report.ppCalculation;
+    text += `\nTemel: +${pp.base} PP`;
+
+    for (const bonus of pp.bonuses) {
+      text += `\n${bonus.description}: +${bonus.amount} PP`;
+    }
+
+    text += `\n<strong>Toplam: +${pp.total} PP</strong>`;
+    text += `\nYeni PP: ${report.newTotalPP}`;
+
+    // Yeni başarımlar
+    if (report.newAchievements.length > 0) {
+      text += '\n\n--- Yeni Basarimlar ---';
+      for (const achievement of report.newAchievements) {
+        text += `\n${achievement.icon} ${achievement.name} (+${achievement.ppReward} PP)`;
+      }
+    }
+
+    // Yeni dönem kilitleri açıldıysa
+    if (report.newEraUnlocks.length > 0) {
+      text += '\n\n--- Yeni Donemler Acildi ---';
+      const eraNames: Record<string, string> = {
+        'renaissance': 'Ronesans',
+        'industrial': 'Sanayi Devrimi',
+        'modern': 'Modern Cag',
+        'future': 'Gelecek'
+      };
+      for (const era of report.newEraUnlocks) {
+        text += `\n${eraNames[era] || era}`;
+      }
+    }
+
+    return text;
   }
 
   private showMenu(): void {
