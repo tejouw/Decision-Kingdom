@@ -1336,6 +1336,1092 @@ export const medievalCards: Card[] = [
       { type: ConditionType.FLAG_SET, flag: 'festival_duzenlendi' }
     ],
     priority: 5
+  },
+
+  // ============= VEZİR OLAY ZİNCİRİ =============
+  {
+    id: 'vezir_guc_toplama',
+    character: characters.vezir,
+    text: 'Sultanım, saraya daha fazla kontrol getirmemiz lazım. Valilerin yetkilerini kısıtlayalım mı?',
+    leftChoice: {
+      text: 'Hayır',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ],
+      relationshipChange: -10
+    },
+    rightChoice: {
+      text: 'Evet',
+      effects: [
+        { resource: ResourceType.GOLD, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -8, max: -5 }
+      ],
+      setFlags: ['merkezi_yonetim'],
+      triggeredEvents: ['vezir_valiler_tepki'],
+      relationshipChange: 15
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'vezir', value: 3 }
+    ]
+  },
+  {
+    id: 'vezir_valiler_tepki',
+    character: characters.vezir,
+    text: 'Valiler yeni düzene karşı çıkıyor. Bazıları isyan hazırlığında olabilir.',
+    leftChoice: {
+      text: 'Yumuşat',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 },
+        { resource: ResourceType.GOLD, min: -5, max: -3 }
+      ],
+      removeFlags: ['merkezi_yonetim']
+    },
+    rightChoice: {
+      text: 'Bastır',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -10, max: -5 }
+      ],
+      setFlags: ['valiler_bastirildi']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'vezir_taht_plani',
+    character: characters.vezir,
+    text: 'Sultanım, geleceği düşünmeliyiz. Bir varis belirlememiz gerekiyor.',
+    leftChoice: {
+      text: 'Bekle',
+      effects: [
+        { resource: ResourceType.FAITH, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Belirle',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 5, max: 8 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ],
+      setFlags: ['varis_belirlendi']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.TURN_ABOVE, value: 25 },
+      { type: ConditionType.CHARACTER_RELATIONSHIP_ABOVE, characterId: 'vezir', value: 30 }
+    ]
+  },
+
+  // ============= GENERAL OLAY ZİNCİRİ =============
+  {
+    id: 'general_ordu_modernizasyon',
+    character: characters.general,
+    text: 'Ordunun modernizasyonu şart! Yeni taktikler ve silahlar için bütçe istiyorum.',
+    leftChoice: {
+      text: 'Reddet',
+      effects: [
+        { resource: ResourceType.MILITARY, min: -10, max: -5 }
+      ],
+      relationshipChange: -15
+    },
+    rightChoice: {
+      text: 'Onayla',
+      effects: [
+        { resource: ResourceType.GOLD, min: -20, max: -15 },
+        { resource: ResourceType.MILITARY, min: 15, max: 20 }
+      ],
+      setFlags: ['ordu_modern'],
+      triggeredEvents: ['general_modernizasyon_sonuc'],
+      relationshipChange: 20
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.GOLD, value: 50 },
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'general', value: 4 }
+    ]
+  },
+  {
+    id: 'general_modernizasyon_sonuc',
+    character: characters.general,
+    text: 'Modernizasyon başarılı! Ordumuz artık çok daha güçlü. İmparatorluk kurabiliriz!',
+    leftChoice: {
+      text: 'Savunma odaklı',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Fetih planla',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 15, max: 20 },
+        { resource: ResourceType.GOLD, min: -10, max: -5 }
+      ],
+      setFlags: ['fetih_plani']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'general_darbe_teklifi',
+    character: characters.general,
+    text: 'Sultanım, bazı komutanlar... güç için size sadık olmayabilir. Önlem alalım mı?',
+    leftChoice: {
+      text: 'Güveniyorum',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Temizlik yap',
+      effects: [
+        { resource: ResourceType.MILITARY, min: -15, max: -10 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['ordu_temizligi']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.MILITARY, value: 70 },
+      { type: ConditionType.TURN_ABOVE, value: 20 }
+    ],
+    priority: 8
+  },
+  {
+    id: 'general_zafer_kutlamasi',
+    character: characters.general,
+    text: 'Büyük zaferimizi kutlamalıyız! Askerlere ödül ve halka şölen!',
+    leftChoice: {
+      text: 'Mütevazı ol',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 },
+        { resource: ResourceType.MILITARY, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kutla',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.HAPPINESS, min: 15, max: 20 },
+        { resource: ResourceType.MILITARY, min: 10, max: 15 }
+      ]
+    },
+    category: EventCategory.CHAIN,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'sefer_basladi' }
+    ],
+    priority: 7
+  },
+
+  // ============= HAZİNEDAR OLAY ZİNCİRİ =============
+  {
+    id: 'hazinedar_ekonomi_reform',
+    character: characters.hazinedar,
+    text: 'Ekonomik reform zamanı! Para birimini değiştirelim ve ticaret vergileri yeniden düzenleyelim.',
+    leftChoice: {
+      text: 'Riskli',
+      effects: [
+        { resource: ResourceType.GOLD, min: -5, max: -3 }
+      ],
+      relationshipChange: -10
+    },
+    rightChoice: {
+      text: 'Başlat',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: -8, max: -5 }
+      ],
+      setFlags: ['ekonomi_reform'],
+      triggeredEvents: ['hazinedar_reform_sonuc'],
+      relationshipChange: 15
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'hazinedar', value: 4 },
+      { type: ConditionType.TURN_ABOVE, value: 15 }
+    ]
+  },
+  {
+    id: 'hazinedar_reform_sonuc',
+    character: characters.hazinedar,
+    text: 'Reform meyvelerini veriyor! Ticaret canlanıyor, hazine doluyor.',
+    leftChoice: {
+      text: 'Yeterli',
+      effects: [
+        { resource: ResourceType.GOLD, min: 15, max: 20 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Genişlet',
+      effects: [
+        { resource: ResourceType.GOLD, min: 25, max: 35 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['ticaret_imparatorlugu']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'hazinedar_vergi_isyani',
+    character: characters.hazinedar,
+    text: 'Vergi toplayıcılarına saldırılar başladı! Halk yüksek vergilerden şikayetçi.',
+    leftChoice: {
+      text: 'Vergi indir',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.HAPPINESS, min: 15, max: 20 }
+      ]
+    },
+    rightChoice: {
+      text: 'Askeri gönder',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 5, max: 8 },
+        { resource: ResourceType.HAPPINESS, min: -15, max: -10 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.RESOURCE_BELOW, resource: ResourceType.HAPPINESS, value: 40 },
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.GOLD, value: 60 }
+    ],
+    priority: 7
+  },
+  {
+    id: 'hazinedar_yatirim_firsat',
+    character: characters.hazinedar,
+    text: 'Denizaşırı ticaret için büyük bir fırsat! Riskli ama kazanç çok yüksek olabilir.',
+    leftChoice: {
+      text: 'Geç',
+      effects: [
+        { resource: ResourceType.GOLD, min: 3, max: 5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Yatır',
+      effects: [
+        { resource: ResourceType.GOLD, min: -20, max: -15 }
+      ],
+      triggeredEvents: ['hazinedar_yatirim_sonuc']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.CHARACTER_RELATIONSHIP_ABOVE, characterId: 'hazinedar', value: 25 }
+    ]
+  },
+  {
+    id: 'hazinedar_yatirim_sonuc',
+    character: characters.hazinedar,
+    text: 'Yatırım büyük başarı sağladı! Gemiler altınla döndü!',
+    leftChoice: {
+      text: 'Mükemmel',
+      effects: [
+        { resource: ResourceType.GOLD, min: 40, max: 50 },
+        { resource: ResourceType.HAPPINESS, min: 8, max: 12 }
+      ]
+    },
+    rightChoice: {
+      text: 'Tekrarla',
+      effects: [
+        { resource: ResourceType.GOLD, min: 30, max: 40 }
+      ],
+      setFlags: ['deniz_ticareti']
+    },
+    priority: 12,
+    category: EventCategory.CHAIN
+  },
+
+  // ============= İMAM OLAY ZİNCİRİ =============
+  {
+    id: 'imam_din_devlet',
+    character: characters.imam,
+    text: 'Sultanım, dinin devlet işlerinde daha fazla söz sahibi olması gerekiyor.',
+    leftChoice: {
+      text: 'Ayır',
+      effects: [
+        { resource: ResourceType.FAITH, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ],
+      setFlags: ['laik_yonetim']
+    },
+    rightChoice: {
+      text: 'Birleştir',
+      effects: [
+        { resource: ResourceType.FAITH, min: 15, max: 20 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ],
+      setFlags: ['dini_yonetim'],
+      triggeredEvents: ['imam_dini_kanun']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'imam', value: 4 },
+      { type: ConditionType.TURN_ABOVE, value: 20 }
+    ]
+  },
+  {
+    id: 'imam_dini_kanun',
+    character: characters.imam,
+    text: 'Yeni dini kanunlar hazırladık. Onayınızı bekliyoruz.',
+    leftChoice: {
+      text: 'Yumuşat',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 },
+        { resource: ResourceType.HAPPINESS, min: 3, max: 5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Katı uygula',
+      effects: [
+        { resource: ResourceType.FAITH, min: 15, max: 20 },
+        { resource: ResourceType.HAPPINESS, min: -15, max: -10 }
+      ],
+      setFlags: ['seri_hukuk']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'imam_kutsal_savas',
+    character: characters.imam,
+    text: 'Kafirler kutsal topraklarımızı tehdit ediyor! Kutsal savaş ilan etmeliyiz!',
+    leftChoice: {
+      text: 'Diplomasi',
+      effects: [
+        { resource: ResourceType.FAITH, min: -10, max: -5 },
+        { resource: ResourceType.GOLD, min: 5, max: 10 }
+      ]
+    },
+    rightChoice: {
+      text: 'Cihat!',
+      effects: [
+        { resource: ResourceType.FAITH, min: 20, max: 25 },
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.GOLD, min: -15, max: -10 }
+      ],
+      setFlags: ['kutsal_savas']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.FAITH, value: 60 },
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.MILITARY, value: 50 }
+    ],
+    priority: 8
+  },
+  {
+    id: 'imam_alim_davet',
+    character: characters.imam,
+    text: 'Uzak diyarlardan ünlü alimler geldi. Onları ağırlayıp ilim meclisi kuralım mı?',
+    leftChoice: {
+      text: 'Gerek yok',
+      effects: [
+        { resource: ResourceType.FAITH, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Ağırla',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 },
+        { resource: ResourceType.FAITH, min: 12, max: 18 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ],
+      setFlags: ['ilim_meclisi']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'medrese_acildi' }
+    ]
+  },
+
+  // ============= TÜCCAR OLAY ZİNCİRİ =============
+  {
+    id: 'tuccar_lonca_birlik',
+    character: characters.tuccar,
+    text: 'Tüm loncaları tek çatı altında birleştirmek istiyoruz. Ticaret daha koordineli olacak.',
+    leftChoice: {
+      text: 'Bağımsız kalsın',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Birleştir',
+      effects: [
+        { resource: ResourceType.GOLD, min: 15, max: 20 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ],
+      setFlags: ['lonca_birligi'],
+      triggeredEvents: ['tuccar_lonca_guc']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'tuccar', value: 4 }
+    ]
+  },
+  {
+    id: 'tuccar_lonca_guc',
+    character: characters.tuccar,
+    text: 'Lonca birliği çok güçlendi. Artık devlet işlerinde de söz istiyorlar.',
+    leftChoice: {
+      text: 'Sınırla',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 },
+        { resource: ResourceType.MILITARY, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kabul et',
+      effects: [
+        { resource: ResourceType.GOLD, min: 20, max: 30 },
+        { resource: ResourceType.MILITARY, min: -5, max: -3 }
+      ],
+      setFlags: ['tuccar_oligarsi']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'tuccar_pazar_tekel',
+    character: characters.tuccar,
+    text: 'Bazı tüccarlar tekel oluşturmuş. Fiyatları kontrol ediyorlar.',
+    leftChoice: {
+      text: 'Serbest bırak',
+      effects: [
+        { resource: ResourceType.GOLD, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -10, max: -5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kır',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 10, max: 15 },
+        { resource: ResourceType.GOLD, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.GOLD, value: 65 }
+    ]
+  },
+  {
+    id: 'tuccar_dis_ticaret',
+    character: characters.tuccar,
+    text: 'Yeni ticaret anlaşmaları imzalamak istiyoruz. Batı krallıklarıyla mı, Doğu hanlıklarıyla mı?',
+    leftChoice: {
+      text: 'Batı',
+      effects: [
+        { resource: ResourceType.GOLD, min: 15, max: 20 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['bati_ticareti']
+    },
+    rightChoice: {
+      text: 'Doğu',
+      effects: [
+        { resource: ResourceType.GOLD, min: 15, max: 20 },
+        { resource: ResourceType.MILITARY, min: 5, max: 8 }
+      ],
+      setFlags: ['dogu_ticareti']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'ticaret_yolu_acildi' }
+    ]
+  },
+
+  // ============= CASUS OLAY ZİNCİRİ =============
+  {
+    id: 'casus_ag_kurma',
+    character: characters.casus,
+    text: 'Sultanım, tüm krallıklarda casus ağı kurabiliriz. Hiçbir şey gizli kalmaz.',
+    leftChoice: {
+      text: 'Pahalı',
+      effects: [
+        { resource: ResourceType.MILITARY, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kur',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.MILITARY, min: 10, max: 15 }
+      ],
+      setFlags: ['casus_agi'],
+      triggeredEvents: ['casus_ag_rapor']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'casus', value: 3 }
+    ]
+  },
+  {
+    id: 'casus_ag_rapor',
+    character: characters.casus,
+    text: 'Casus ağımız mükemmel çalışıyor. Düşman planlarını önceden biliyoruz.',
+    leftChoice: {
+      text: 'Savunma',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: 3, max: 5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Sabotaj',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 15, max: 20 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['aktif_sabotaj']
+    },
+    priority: 10,
+    category: EventCategory.CHAIN
+  },
+  {
+    id: 'casus_ic_tehdit',
+    character: characters.casus,
+    text: 'Sarayda ciddi bir iç tehdit var. Birisi sizi zehirlemeye çalışıyor.',
+    leftChoice: {
+      text: 'Dikkat et',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Bul',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 }
+      ],
+      triggeredEvents: ['casus_zehir_sonuc']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'casus_agi' },
+      { type: ConditionType.TURN_ABOVE, value: 25 }
+    ],
+    priority: 8
+  },
+  {
+    id: 'casus_zehir_sonuc',
+    character: characters.casus,
+    text: 'Suçluyu yakaladık! Komşu kralın adamıymış. Ne yapalım?',
+    leftChoice: {
+      text: 'İade et',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 },
+        { resource: ResourceType.MILITARY, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'İdam et',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['dusman_ilan']
+    },
+    priority: 12,
+    category: EventCategory.CHAIN
+  },
+
+  // ============= HEKİM OLAY ZİNCİRİ =============
+  {
+    id: 'hekim_hastane',
+    character: characters.hekim,
+    text: 'Büyük bir hastane kurmak istiyorum. Tüm halk tedavi görebilir.',
+    leftChoice: {
+      text: 'Çok pahalı',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kur',
+      effects: [
+        { resource: ResourceType.GOLD, min: -20, max: -15 },
+        { resource: ResourceType.HAPPINESS, min: 15, max: 20 },
+        { resource: ResourceType.FAITH, min: 8, max: 12 }
+      ],
+      setFlags: ['hastane_kuruldu']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'hekim', value: 3 },
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.GOLD, value: 50 }
+    ]
+  },
+  {
+    id: 'hekim_eczane',
+    character: characters.hekim,
+    text: 'Şifalı bitki bahçesi ve eczane kurmak istiyorum. Kendi ilaçlarımızı üretebiliriz.',
+    leftChoice: {
+      text: 'Gerek yok',
+      effects: [
+        { resource: ResourceType.FAITH, min: 3, max: 5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kur',
+      effects: [
+        { resource: ResourceType.GOLD, min: -8, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 8, max: 12 }
+      ],
+      setFlags: ['eczane_kuruldu']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'hastane_kuruldu' }
+    ]
+  },
+  {
+    id: 'hekim_yasli_sultan',
+    character: characters.hekim,
+    text: 'Sultanım, sağlığınız için endişeleniyorum. Dinlenmeniz gerekiyor.',
+    leftChoice: {
+      text: 'Çalışmalıyım',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 3, max: 5 },
+        { resource: ResourceType.HAPPINESS, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Dinlen',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 },
+        { resource: ResourceType.FAITH, min: 3, max: 5 }
+      ]
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.TURN_ABOVE, value: 40 }
+    ]
+  },
+
+  // ============= ŞAİR OLAY ZİNCİRİ =============
+  {
+    id: 'sair_destan',
+    character: characters.sair,
+    text: 'Saltanatınız için bir destan yazmak istiyorum. Nesiller boyu anlatılsın.',
+    leftChoice: {
+      text: 'Mütevazı kal',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Yaz',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 10, max: 15 }
+      ],
+      setFlags: ['destan_yazildi']
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'sair', value: 3 },
+      { type: ConditionType.TURN_ABOVE, value: 30 }
+    ]
+  },
+  {
+    id: 'sair_propaganda',
+    character: characters.sair,
+    text: 'Düşmanlarınız hakkında aşağılayıcı şiirler yazabilirim. Moral bozar.',
+    leftChoice: {
+      text: 'Onurlu ol',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Yaz',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 8, max: 12 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'sefer_basladi' }
+    ]
+  },
+  {
+    id: 'sair_kultur_festivali',
+    character: characters.sair,
+    text: 'Büyük bir kültür ve sanat festivali düzenleyelim! Tüm sanatçılar gelsin.',
+    leftChoice: {
+      text: 'Gereksiz',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Düzenle',
+      effects: [
+        { resource: ResourceType.GOLD, min: -12, max: -8 },
+        { resource: ResourceType.HAPPINESS, min: 15, max: 20 },
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ],
+      setFlags: ['kultur_merkezi']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'destan_yazildi' }
+    ]
+  },
+
+  // ============= PRENSES OLAY ZİNCİRİ =============
+  {
+    id: 'prenses_egitim',
+    character: characters.prenses,
+    text: 'Babacığım, daha fazla eğitim almak istiyorum. Yabancı hocalar getirtin.',
+    leftChoice: {
+      text: 'Yeter',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ],
+      relationshipChange: -15
+    },
+    rightChoice: {
+      text: 'Getirt',
+      effects: [
+        { resource: ResourceType.GOLD, min: -8, max: -5 },
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ],
+      relationshipChange: 15
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'prenses', value: 2 }
+    ]
+  },
+  {
+    id: 'prenses_asi',
+    character: characters.prenses,
+    text: 'Babacığım, bu evlilik istemiyorum. Aşık olduğum biri var - bir şövalye.',
+    leftChoice: {
+      text: 'Anlayış göster',
+      effects: [
+        { resource: ResourceType.MILITARY, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 10, max: 15 }
+      ],
+      relationshipChange: 30,
+      setFlags: ['prenses_ask']
+    },
+    rightChoice: {
+      text: 'Reddet',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -10, max: -5 }
+      ],
+      relationshipChange: -30
+    },
+    category: EventCategory.STORY,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'prenses_evlendi' }
+    ],
+    priority: 8
+  },
+  {
+    id: 'prenses_yardim_dernegi',
+    character: characters.prenses,
+    text: 'Yoksul kadınlar için eğitim ve meslek kazandırma programı başlatmak istiyorum.',
+    leftChoice: {
+      text: 'Uygun değil',
+      effects: [
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      relationshipChange: -10
+    },
+    rightChoice: {
+      text: 'Destekle',
+      effects: [
+        { resource: ResourceType.GOLD, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 12, max: 18 },
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ],
+      relationshipChange: 15,
+      setFlags: ['kadin_egitimi']
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.CHARACTER_RELATIONSHIP_ABOVE, characterId: 'prenses', value: 20 }
+    ]
+  },
+
+  // ============= EK OLAYLAR =============
+  {
+    id: 'kuraklık_devam',
+    character: characters.koy_muhtari,
+    text: 'Kuraklık devam ediyor! Su kaynakları tükeniyor, halk göç etmeye başladı.',
+    leftChoice: {
+      text: 'Kanal aç',
+      effects: [
+        { resource: ResourceType.GOLD, min: -20, max: -15 },
+        { resource: ResourceType.HAPPINESS, min: 10, max: 15 }
+      ],
+      setFlags: ['sulama_sistemi']
+    },
+    rightChoice: {
+      text: 'Yağmur duası',
+      effects: [
+        { resource: ResourceType.FAITH, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.RESOURCE_BELOW, resource: ResourceType.HAPPINESS, value: 40 }
+    ],
+    priority: 6
+  },
+  {
+    id: 'sinir_catismasi',
+    character: characters.general,
+    text: 'Sınırda komşu güçlerle çatışma çıktı! Tırmanma riski var.',
+    leftChoice: {
+      text: 'Geri çekil',
+      effects: [
+        { resource: ResourceType.MILITARY, min: -8, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Mukabele',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.GOLD, min: -8, max: -5 }
+      ],
+      setFlags: ['sinir_gerginlik']
+    },
+    category: EventCategory.RANDOM,
+    priority: 7
+  },
+  {
+    id: 'goçebe_saldiri',
+    character: characters.general,
+    text: 'Göçebe kabileler köylere saldırıyor! Acil müdahale gerekiyor.',
+    leftChoice: {
+      text: 'Haraç ver',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.MILITARY, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Püskürt',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    priority: 7,
+    weight: 1
+  },
+  {
+    id: 'halk_sikayet',
+    character: characters.koy_muhtari,
+    text: 'Halk adalet arıyor! Zenginler ve fakirler arasında uçurum büyüyor.',
+    leftChoice: {
+      text: 'Dinle',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 8, max: 12 },
+        { resource: ResourceType.GOLD, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Sustur',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 5, max: 8 },
+        { resource: ResourceType.HAPPINESS, min: -10, max: -5 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.RESOURCE_ABOVE, resource: ResourceType.GOLD, value: 70 },
+      { type: ConditionType.RESOURCE_BELOW, resource: ResourceType.HAPPINESS, value: 50 }
+    ]
+  },
+  {
+    id: 'yabanci_din',
+    character: characters.imam,
+    text: 'Yabancı misyonerler halka farklı din öğretiyor. Ne yapalım?',
+    leftChoice: {
+      text: 'Hoşgörü',
+      effects: [
+        { resource: ResourceType.FAITH, min: -10, max: -5 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 },
+        { resource: ResourceType.GOLD, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Yasakla',
+      effects: [
+        { resource: ResourceType.FAITH, min: 10, max: 15 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'yabanci_iliski' }
+    ]
+  },
+  {
+    id: 'saray_entrika',
+    character: characters.casus,
+    text: 'Sarayda ciddi bir entrika var. Vezirin ve generalin arası bozuk.',
+    leftChoice: {
+      text: 'Arabulucu',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kullan',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 8, max: 12 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'vezir', value: 3 },
+      { type: ConditionType.CHARACTER_INTERACTION, characterId: 'general', value: 3 }
+    ]
+  },
+  {
+    id: 'zengin_bagiş',
+    character: characters.hazinedar,
+    text: 'Zengin bir tüccar sarayı onurlandırmak istiyor. Büyük bağış teklif ediyor.',
+    leftChoice: {
+      text: 'Reddet',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kabul et',
+      effects: [
+        { resource: ResourceType.GOLD, min: 20, max: 30 },
+        { resource: ResourceType.FAITH, min: -5, max: -3 }
+      ],
+      setFlags: ['tuccar_nufuz']
+    },
+    category: EventCategory.RANDOM,
+    weight: 1
+  },
+  {
+    id: 'astronomi_keşif',
+    character: characters.hekim,
+    text: 'Astronomlar ilginç bir keşif yaptı! Gökyüzünde yeni bir yıldız.',
+    leftChoice: {
+      text: 'Uğursuz',
+      effects: [
+        { resource: ResourceType.FAITH, min: -5, max: -3 },
+        { resource: ResourceType.HAPPINESS, min: -3, max: -1 }
+      ]
+    },
+    rightChoice: {
+      text: 'Kutla',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 8, max: 12 },
+        { resource: ResourceType.FAITH, min: 5, max: 8 }
+      ]
+    },
+    category: EventCategory.RARE,
+    weight: 1
+  },
+  {
+    id: 'korsan_tehdidi',
+    character: characters.tuccar,
+    text: 'Korsanlar ticaret gemilerimizi vuruyor! Deniz güvenliği sağlanmalı.',
+    leftChoice: {
+      text: 'Haraç öde',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Donanma kur',
+      effects: [
+        { resource: ResourceType.GOLD, min: -20, max: -15 },
+        { resource: ResourceType.MILITARY, min: 10, max: 15 }
+      ],
+      setFlags: ['donanma_kuruldu']
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'deniz_ticareti' }
+    ]
+  },
+  {
+    id: 'salgın_yayılıyor',
+    character: characters.hekim,
+    text: 'Hastalık başka şehirlere yayılıyor! Karantina genişletilmeli.',
+    leftChoice: {
+      text: 'Kısıtlı tut',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 },
+        { resource: ResourceType.MILITARY, min: -10, max: -5 }
+      ]
+    },
+    rightChoice: {
+      text: 'Genişlet',
+      effects: [
+        { resource: ResourceType.GOLD, min: -15, max: -10 },
+        { resource: ResourceType.HAPPINESS, min: -8, max: -5 },
+        { resource: ResourceType.MILITARY, min: 5, max: 8 }
+      ]
+    },
+    category: EventCategory.CHAIN,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'karantina_uygulandi' }
+    ],
+    priority: 8
+  },
+  {
+    id: 'hanedan_kavga',
+    character: characters.vezir,
+    text: 'Hanedan üyeleri arasında miras kavgası çıktı. Taraf tutmanız isteniyor.',
+    leftChoice: {
+      text: 'Tarafsız kal',
+      effects: [
+        { resource: ResourceType.HAPPINESS, min: -5, max: -3 }
+      ]
+    },
+    rightChoice: {
+      text: 'Hakem ol',
+      effects: [
+        { resource: ResourceType.FAITH, min: 5, max: 8 },
+        { resource: ResourceType.GOLD, min: -5, max: -3 }
+      ]
+    },
+    category: EventCategory.RANDOM,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'varis_belirlendi' }
+    ]
+  },
+  {
+    id: 'kahramanlik_hikayesi',
+    character: characters.sair,
+    text: 'Bir askerimiz savaşta kahramanlık gösterdi. Hikayesini yazayım mı?',
+    leftChoice: {
+      text: 'Gerek yok',
+      effects: []
+    },
+    rightChoice: {
+      text: 'Yaz',
+      effects: [
+        { resource: ResourceType.MILITARY, min: 8, max: 12 },
+        { resource: ResourceType.HAPPINESS, min: 5, max: 8 }
+      ]
+    },
+    category: EventCategory.CHARACTER,
+    conditions: [
+      { type: ConditionType.FLAG_SET, flag: 'sefer_basladi' }
+    ]
   }
 ];
 

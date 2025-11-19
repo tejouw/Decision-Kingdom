@@ -65,18 +65,40 @@ export class ResourceManager {
   }
 
   // Efektleri uygula
-  applyEffects(effects: ResourceEffect[]): void {
+  applyEffects(effects: ResourceEffect[], turn?: number): void {
     for (const effect of effects) {
-      const amount = this.calculateRandomEffect(effect);
+      const amount = this.calculateRandomEffect(effect, turn);
       this.modifyResource(effect.resource, amount);
     }
   }
 
-  // Rastgele efekt hesapla
-  private calculateRandomEffect(effect: ResourceEffect): number {
+  // Zorluk çarpanını hesapla (tur bazlı)
+  private getDifficultyMultiplier(turn: number): number {
+    if (turn <= 10) {
+      return 1.0;      // Tur 1-10: Temel efektler
+    } else if (turn <= 30) {
+      return 1.5;      // Tur 11-30: Orta zorluk
+    } else if (turn <= 50) {
+      return 2.0;      // Tur 31-50: Yüksek zorluk
+    } else {
+      return 2.5;      // Tur 50+: Aşırı zorluk
+    }
+  }
+
+  // Rastgele efekt hesapla (zorluk ölçeklemesi ile)
+  private calculateRandomEffect(effect: ResourceEffect, turn?: number): number {
     const min = Math.min(effect.min, effect.max);
     const max = Math.max(effect.min, effect.max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    let amount = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // Zorluk ölçeklemesi uygula
+    if (turn && turn > 10) {
+      const multiplier = this.getDifficultyMultiplier(turn);
+      // Pozitif ve negatif efektler için aynı şekilde ölçekle
+      amount = Math.round(amount * multiplier);
+    }
+
+    return amount;
   }
 
   // Değeri sınırla
