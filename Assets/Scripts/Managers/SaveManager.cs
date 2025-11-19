@@ -18,6 +18,9 @@ namespace DecisionKingdom.Managers
 
         private float _lastAutoSaveTime;
 
+        // Save versioning for forward compatibility
+        private const int SAVE_VERSION = 1;
+
         // Events
         public event Action OnSaveCompleted;
         public event Action OnLoadCompleted;
@@ -41,10 +44,11 @@ namespace DecisionKingdom.Managers
         {
             if (_autoSaveEnabled && GameManager.Instance != null && GameManager.Instance.IsPlaying)
             {
-                if (Time.time - _lastAutoSaveTime >= _autoSaveInterval)
+                // Use realtimeSinceStartup instead of Time.time to avoid issues with timeScale
+                if (Time.realtimeSinceStartup - _lastAutoSaveTime >= _autoSaveInterval)
                 {
                     AutoSave();
-                    _lastAutoSaveTime = Time.time;
+                    _lastAutoSaveTime = Time.realtimeSinceStartup;
                 }
             }
         }
@@ -65,7 +69,16 @@ namespace DecisionKingdom.Managers
                 }
 
                 GameStateData gameState = GameManager.Instance.GetGameStateForSave();
-                string json = JsonUtility.ToJson(gameState, true);
+
+                // Create versioned save wrapper
+                var saveWrapper = new SaveDataWrapper
+                {
+                    version = SAVE_VERSION,
+                    timestamp = DateTime.Now.ToBinary(),
+                    gameState = gameState
+                };
+
+                string json = JsonUtility.ToJson(saveWrapper, true);
                 PlayerPrefs.SetString(Constants.SAVE_KEY_GAME_STATE, json);
                 PlayerPrefs.Save();
 
@@ -73,10 +86,16 @@ namespace DecisionKingdom.Managers
                 Debug.Log("[SaveManager] Oyun kaydedildi");
                 return true;
             }
+            catch (ArgumentException ex)
+            {
+                OnSaveError?.Invoke($"Serileştirme hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] Kayıt serileştirme hatası: {ex.Message}");
+                return false;
+            }
             catch (Exception ex)
             {
                 OnSaveError?.Invoke(ex.Message);
-                Debug.LogError($"[SaveManager] Kayıt hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] Kayıt hatası: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -86,6 +105,12 @@ namespace DecisionKingdom.Managers
         /// </summary>
         public bool SaveStatistics(PlayerStatistics statistics)
         {
+            if (statistics == null)
+            {
+                Debug.LogWarning("[SaveManager] SaveStatistics: statistics is null");
+                return false;
+            }
+
             try
             {
                 string json = JsonUtility.ToJson(statistics, true);
@@ -95,9 +120,14 @@ namespace DecisionKingdom.Managers
                 Debug.Log("[SaveManager] İstatistikler kaydedildi");
                 return true;
             }
+            catch (ArgumentException ex)
+            {
+                Debug.LogError($"[SaveManager] İstatistik serileştirme hatası: {ex.Message}");
+                return false;
+            }
             catch (Exception ex)
             {
-                Debug.LogError($"[SaveManager] İstatistik kayıt hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] İstatistik kayıt hatası: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -127,6 +157,12 @@ namespace DecisionKingdom.Managers
         /// </summary>
         public bool SaveUnlocks(UnlockData unlocks)
         {
+            if (unlocks == null)
+            {
+                Debug.LogWarning("[SaveManager] SaveUnlocks: unlocks is null");
+                return false;
+            }
+
             try
             {
                 string json = JsonUtility.ToJson(unlocks, true);
@@ -136,9 +172,14 @@ namespace DecisionKingdom.Managers
                 Debug.Log("[SaveManager] Unlock verileri kaydedildi");
                 return true;
             }
+            catch (ArgumentException ex)
+            {
+                Debug.LogError($"[SaveManager] Unlock serileştirme hatası: {ex.Message}");
+                return false;
+            }
             catch (Exception ex)
             {
-                Debug.LogError($"[SaveManager] Unlock kayıt hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] Unlock kayıt hatası: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -159,7 +200,48 @@ namespace DecisionKingdom.Managers
                 }
 
                 string json = PlayerPrefs.GetString(Constants.SAVE_KEY_GAME_STATE);
-                GameStateData gameState = JsonUtility.FromJson<GameStateData>(json);
+
+                // Validate JSON before parsing
+                if (string.IsNullOrEmpty(json))
+                {
+                    OnLoadError?.Invoke("Kayıt verisi boş");
+                    return false;
+                }
+
+                GameStateData gameState;
+
+                // Try to load with version wrapper first (new format)
+                try
+                {
+                    var saveWrapper = JsonUtility.FromJson<SaveDataWrapper>(json);
+                    if (saveWrapper != null && saveWrapper.gameState != null)
+                    {
+                        // Handle version migration if needed
+                        if (saveWrapper.version < SAVE_VERSION)
+                        {
+                            Debug.Log($"[SaveManager] Migrating save from version {saveWrapper.version} to {SAVE_VERSION}");
+                            // Add migration logic here for future versions
+                        }
+                        gameState = saveWrapper.gameState;
+                    }
+                    else
+                    {
+                        // Fallback to old format (direct GameStateData)
+                        gameState = JsonUtility.FromJson<GameStateData>(json);
+                    }
+                }
+                catch
+                {
+                    // Fallback to old format for backwards compatibility
+                    gameState = JsonUtility.FromJson<GameStateData>(json);
+                }
+
+                if (gameState == null)
+                {
+                    OnLoadError?.Invoke("Kayıt verisi okunamadı");
+                    Debug.LogError("[SaveManager] GameState is null after deserialization");
+                    return false;
+                }
 
                 if (GameManager.Instance != null)
                 {
@@ -170,10 +252,16 @@ namespace DecisionKingdom.Managers
                 Debug.Log("[SaveManager] Oyun yüklendi");
                 return true;
             }
+            catch (ArgumentException ex)
+            {
+                OnLoadError?.Invoke($"JSON format hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] JSON parse hatası: {ex.Message}");
+                return false;
+            }
             catch (Exception ex)
             {
                 OnLoadError?.Invoke(ex.Message);
-                Debug.LogError($"[SaveManager] Yükleme hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] Yükleme hatası: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -191,11 +279,22 @@ namespace DecisionKingdom.Managers
                 }
 
                 string json = PlayerPrefs.GetString(Constants.SAVE_KEY_STATISTICS);
-                return JsonUtility.FromJson<PlayerStatistics>(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    return new PlayerStatistics();
+                }
+
+                var result = JsonUtility.FromJson<PlayerStatistics>(json);
+                return result ?? new PlayerStatistics();
+            }
+            catch (ArgumentException ex)
+            {
+                Debug.LogError($"[SaveManager] İstatistik JSON parse hatası: {ex.Message}");
+                return new PlayerStatistics();
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SaveManager] İstatistik yükleme hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] İstatistik yükleme hatası: {ex.Message}\n{ex.StackTrace}");
                 return new PlayerStatistics();
             }
         }
@@ -221,11 +320,22 @@ namespace DecisionKingdom.Managers
                 }
 
                 string json = PlayerPrefs.GetString(Constants.SAVE_KEY_UNLOCKS);
-                return JsonUtility.FromJson<UnlockData>(json);
+                if (string.IsNullOrEmpty(json))
+                {
+                    return new UnlockData();
+                }
+
+                var result = JsonUtility.FromJson<UnlockData>(json);
+                return result ?? new UnlockData();
+            }
+            catch (ArgumentException ex)
+            {
+                Debug.LogError($"[SaveManager] Unlock JSON parse hatası: {ex.Message}");
+                return new UnlockData();
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SaveManager] Unlock yükleme hatası: {ex.Message}");
+                Debug.LogError($"[SaveManager] Unlock yükleme hatası: {ex.Message}\n{ex.StackTrace}");
                 return new UnlockData();
             }
         }
@@ -325,5 +435,16 @@ namespace DecisionKingdom.Managers
         }
 #endif
         #endregion
+    }
+
+    /// <summary>
+    /// Save data wrapper with versioning support
+    /// </summary>
+    [System.Serializable]
+    public class SaveDataWrapper
+    {
+        public int version;
+        public long timestamp;
+        public GameStateData gameState;
     }
 }

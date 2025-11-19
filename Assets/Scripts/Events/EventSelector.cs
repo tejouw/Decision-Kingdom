@@ -4,6 +4,7 @@ using UnityEngine;
 using DecisionKingdom.Core;
 using DecisionKingdom.Data;
 using DecisionKingdom.Managers;
+using DecisionKingdom.Utils;
 
 namespace DecisionKingdom.Events
 {
@@ -60,7 +61,11 @@ namespace DecisionKingdom.Events
             {
                 string triggeredId = gameState.DequeueTriggeredEvent();
                 var triggeredEvent = _eventDatabase.GetEventById(triggeredId);
-                if (triggeredEvent != null && triggeredEvent.CheckConditions(gameState))
+                if (triggeredEvent == null)
+                {
+                    Debug.LogWarning($"[EventSelector] Triggered event not found: {triggeredId}");
+                }
+                else if (triggeredEvent.CheckConditions(gameState))
                 {
                     return triggeredEvent;
                 }
@@ -142,26 +147,28 @@ namespace DecisionKingdom.Events
 
         private GameEvent SelectRareEvent(GameStateData gameState)
         {
+            // Use array instead of ToList() to avoid unnecessary allocation
             var rareEvents = _eventDatabase.Events
                 .Where(e => e.isRare)
                 .Where(e => e.era == gameState.era)
                 .Where(e => e.CheckConditions(gameState))
                 .Where(e => !gameState.HasPlayedEvent(e.id))
-                .ToList();
+                .ToArray();
 
-            if (rareEvents.Count == 0)
+            if (rareEvents.Length == 0)
                 return null;
 
-            return rareEvents[Random.Range(0, rareEvents.Count)];
+            return rareEvents[Random.Range(0, rareEvents.Length)];
         }
 
         private List<GameEvent> GetAvailableEvents(GameStateData gameState)
         {
+            // Combine Where clauses for better performance
             return _eventDatabase.Events
-                .Where(e => e.era == gameState.era)
-                .Where(e => e.CheckConditions(gameState))
-                .Where(e => !gameState.HasPlayedEvent(e.id) || e.category == EventCategory.Random)
-                .Where(e => !e.isRare) // Nadir eventler ayrı seçilir
+                .Where(e => e.era == gameState.era
+                    && e.CheckConditions(gameState)
+                    && (!gameState.HasPlayedEvent(e.id) || e.category == EventCategory.Random)
+                    && !e.isRare) // Nadir eventler ayrı seçilir
                 .ToList();
         }
 
@@ -204,8 +211,9 @@ namespace DecisionKingdom.Events
                 result.Add((evt, Mathf.Max(weight, 0.1f)));
             }
 
-            // Önceliğe göre sırala
-            return result.OrderByDescending(x => x.Item2).ToList();
+            // Note: Sorting is not needed since we use weighted random selection
+            // Removing unnecessary OrderByDescending().ToList() allocation
+            return result;
         }
         #endregion
 
@@ -232,14 +240,6 @@ namespace DecisionKingdom.Events
         #endregion
     }
 
-    // Extension method for string truncation
-    public static class StringExtensions
-    {
-        public static string Truncate(this string str, int maxLength)
-        {
-            if (string.IsNullOrEmpty(str) || str.Length <= maxLength)
-                return str;
-            return str.Substring(0, maxLength) + "...";
-        }
-    }
+    // Note: StringExtensions moved to Utils/Extensions.cs to avoid duplication
+    // Use DecisionKingdom.Utils.Extensions.Truncate instead
 }

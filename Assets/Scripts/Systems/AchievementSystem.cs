@@ -22,7 +22,8 @@ namespace DecisionKingdom.Systems
         public event Action<Achievement> OnAchievementUnlocked;
         public event Action<int> OnProgressUpdated;
 
-        private static Dictionary<string, Achievement> _achievements;
+        // Use instance dictionary instead of static to avoid memory leaks
+        private Dictionary<string, Achievement> _achievements;
 
         #region Properties
         public int UnlockedCount => _unlockedAchievements.Count;
@@ -515,10 +516,23 @@ namespace DecisionKingdom.Systems
                 try
                 {
                     var data = JsonUtility.FromJson<AchievementSaveData>(json);
-                    _unlockedAchievements = new HashSet<string>(data.unlockedIds);
+                    if (data != null && data.unlockedIds != null)
+                    {
+                        _unlockedAchievements = new HashSet<string>(data.unlockedIds);
+                    }
+                    else
+                    {
+                        _unlockedAchievements = new HashSet<string>();
+                    }
                 }
-                catch
+                catch (ArgumentException ex)
                 {
+                    Debug.LogWarning($"[AchievementSystem] JSON parse hatası: {ex.Message}");
+                    _unlockedAchievements = new HashSet<string>();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[AchievementSystem] Yükleme hatası: {ex.Message}");
                     _unlockedAchievements = new HashSet<string>();
                 }
             }

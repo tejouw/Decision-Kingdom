@@ -101,8 +101,14 @@ namespace DecisionKingdom.Systems
             {
                 return string.Format(template, args);
             }
-            catch
+            catch (FormatException ex)
             {
+                Debug.LogWarning($"[LocalizationSystem] Format hatası '{key}': {ex.Message}. Args count: {args?.Length ?? 0}");
+                return template;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Debug.LogWarning($"[LocalizationSystem] Null argument '{key}': {ex.Message}");
                 return template;
             }
         }
