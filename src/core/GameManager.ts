@@ -10,11 +10,15 @@ import {
   Choice,
   GameFlag,
   FlagType,
+  Ending,
+  EndingType,
+  EndingCondition,
   RESOURCE_DEFAULT,
   RESOURCE_NAMES
 } from '../models/types.js';
 import { ResourceManager } from './ResourceManager.js';
 import { CardManager } from './CardManager.js';
+import { endings, defaultEnding } from '../data/endings.js';
 
 export type GameEventCallback = (event: string, data?: any) => void;
 
@@ -87,7 +91,12 @@ export class GameManager {
     } else {
       // Kart kalmadı - zafer!
       this.state.status = GameStatus.VICTORY;
-      this.emit('victory', { turn: this.state.turn, score: this.state.score });
+      const ending = this.determineEnding();
+      this.emit('victory', {
+        turn: this.state.turn,
+        score: this.state.score,
+        ending
+      });
     }
   }
 
@@ -135,8 +144,8 @@ export class GameManager {
 
     const choice = isLeft ? this.currentCard.leftChoice : this.currentCard.rightChoice;
 
-    // Efektleri uygula
-    this.resourceManager.applyEffects(choice.effects);
+    // Efektleri uygula (zorluk ölçeklemesi ile)
+    this.resourceManager.applyEffects(choice.effects, this.state.turn);
 
     // Event history'ye ekle
     this.state.eventHistory.push(this.currentCard.id);
@@ -269,13 +278,96 @@ export class GameManager {
       ? `${RESOURCE_NAMES[resource]} tükendi!`
       : `${RESOURCE_NAMES[resource]} çok yükseldi!`;
 
+    // Bitişi belirle
+    const ending = this.determineEnding();
+
     this.emit('gameOver', {
       resource,
       value,
       reason,
       turn: this.state.turn,
-      score: this.state.score
+      score: this.state.score,
+      ending
     });
+  }
+
+  // Bitişi belirle
+  determineEnding(): Ending {
+    // Bitişleri önceliğe göre sırala (yüksekten düşüğe)
+    const sortedEndings = [...endings].sort((a, b) => b.priority - a.priority);
+
+    for (const ending of sortedEndings) {
+      if (this.checkEndingConditions(ending.conditions)) {
+        return ending;
+      }
+    }
+
+    return defaultEnding;
+  }
+
+  // Bitiş koşullarını kontrol et
+  private checkEndingConditions(conditions: EndingCondition[]): boolean {
+    if (conditions.length === 0) {
+      return false;
+    }
+
+    for (const condition of conditions) {
+      if (!this.checkEndingCondition(condition)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Tek bitiş koşulunu kontrol et
+  private checkEndingCondition(condition: EndingCondition): boolean {
+    switch (condition.type) {
+      case 'resource_above':
+        if (condition.resource && condition.value !== undefined) {
+          return this.resourceManager.isAbove(condition.resource, condition.value);
+        }
+        return true;
+
+      case 'resource_below':
+        if (condition.resource && condition.value !== undefined) {
+          return this.resourceManager.isBelow(condition.resource, condition.value);
+        }
+        return true;
+
+      case 'flag_set':
+        if (condition.flag) {
+          return this.state.flags.has(condition.flag);
+        }
+        return true;
+
+      case 'flag_not_set':
+        if (condition.flag) {
+          return !this.state.flags.has(condition.flag);
+        }
+        return true;
+
+      case 'turn_above':
+        if (condition.value !== undefined) {
+          return this.state.turn > condition.value;
+        }
+        return true;
+
+      case 'character_relationship':
+        if (condition.characterId && condition.value !== undefined) {
+          const charState = this.state.characterStates.get(condition.characterId);
+          return charState ? charState.relationship > condition.value : false;
+        }
+        return true;
+
+      default:
+        return true;
+    }
+  }
+
+  // Mevcut bitiş durumunu al (oyun sırasında)
+  getCurrentEnding(): Ending {
+    return this.determineEnding();
   }
 
   // Flag ayarla (geliştirilmiş)

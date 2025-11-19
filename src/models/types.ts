@@ -178,3 +178,45 @@ export const RESOURCE_ICONS: Record<ResourceType, string> = {
   [ResourceType.MILITARY]: '⚔️',
   [ResourceType.FAITH]: '🙏'
 };
+
+// Bitiş türleri
+export enum EndingType {
+  PEACEFUL = 'peaceful',           // Barışçıl yönetim
+  MILITARY = 'military',           // Askeri diktatörlük
+  THEOCRATIC = 'theocratic',       // Teokratik yönetim
+  MERCHANT = 'merchant',           // Tüccar oligarşisi
+  BALANCED = 'balanced',           // Dengeli yönetim
+  TYRANNY = 'tyranny',             // Zorba sultan
+  BELOVED = 'beloved',             // Sevilen sultan
+  REVOLUTIONARY = 'revolutionary', // Devrimci sultan
+  SCHOLAR = 'scholar',             // Bilge sultan
+  CONQUEROR = 'conqueror'          // Fatih sultan
+}
+
+// Bitiş verisi
+export interface Ending {
+  type: EndingType;
+  title: string;
+  description: string;
+  conditions: EndingCondition[];
+  priority: number; // Yüksek öncelik önce kontrol edilir
+}
+
+// Bitiş koşulu
+export interface EndingCondition {
+  type: 'resource_above' | 'resource_below' | 'flag_set' | 'flag_not_set' | 'turn_above' | 'character_relationship';
+  resource?: ResourceType;
+  value?: number;
+  flag?: string;
+  characterId?: string;
+}
+
+// Hikaye dalı
+export interface StoryBranch {
+  id: string;
+  name: string;
+  description: string;
+  requiredFlags: string[];
+  excludedFlags: string[];
+  endingType: EndingType;
+}
