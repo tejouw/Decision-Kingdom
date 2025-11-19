@@ -39,8 +39,10 @@ namespace DecisionKingdom.UI
         private float _currentDisplayValue;
         private float _targetValue;
         private Coroutine _animationCoroutine;
+        private Coroutine _pulseCoroutine;
         private int _previewAmount;
         private bool _isShowingPreview;
+        private bool _isPulsing;
 
         #region Properties
         public ResourceType ResourceType => _resourceType;
@@ -195,7 +197,63 @@ namespace DecisionKingdom.UI
                 bool isDanger = _currentDisplayValue <= _dangerThreshold ||
                                _currentDisplayValue >= (Constants.RESOURCE_MAX - _dangerThreshold);
 
-                // Tehlike durumunda yanıp sönme efekti eklenebilir
+                // Tehlike durumunda yanıp sönme efekti
+                if (isDanger && !_isPulsing)
+                {
+                    StartPulse();
+                }
+                else if (!isDanger && _isPulsing)
+                {
+                    StopPulse();
+                }
+            }
+        }
+
+        private void StartPulse()
+        {
+            if (_pulseCoroutine != null)
+                StopCoroutine(_pulseCoroutine);
+
+            _isPulsing = true;
+            _pulseCoroutine = StartCoroutine(PulseAnimation());
+        }
+
+        private void StopPulse()
+        {
+            if (_pulseCoroutine != null)
+            {
+                StopCoroutine(_pulseCoroutine);
+                _pulseCoroutine = null;
+            }
+
+            _isPulsing = false;
+
+            if (_backgroundImage != null)
+            {
+                Color color = _backgroundImage.color;
+                color.a = 1f;
+                _backgroundImage.color = color;
+            }
+        }
+
+        private IEnumerator PulseAnimation()
+        {
+            float pulseSpeed = 3f;
+            float minAlpha = 0.3f;
+            float maxAlpha = 1f;
+
+            while (_isPulsing)
+            {
+                float alpha = Mathf.Lerp(minAlpha, maxAlpha, (Mathf.Sin(Time.time * pulseSpeed) + 1f) / 2f);
+
+                if (_backgroundImage != null)
+                {
+                    Color color = _backgroundImage.color;
+                    color.a = alpha;
+                    _backgroundImage.color = color;
+                }
+
+                yield return null;
             }
         }
 
