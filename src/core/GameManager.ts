@@ -13,11 +13,13 @@ import {
   Ending,
   EndingType,
   EndingCondition,
+  GameEndReport,
   RESOURCE_DEFAULT,
   RESOURCE_NAMES
 } from '../models/types.js';
 import { ResourceManager } from './ResourceManager.js';
 import { CardManager } from './CardManager.js';
+import { MetaManager } from './MetaManager.js';
 import { endings, defaultEnding } from '../data/endings.js';
 
 export type GameEventCallback = (event: string, data?: any) => void;
@@ -25,6 +27,7 @@ export type GameEventCallback = (event: string, data?: any) => void;
 export class GameManager {
   private resourceManager: ResourceManager;
   private cardManager: CardManager;
+  private metaManager: MetaManager;
   private state: GameState;
   private eventCallbacks: GameEventCallback[] = [];
   private currentCard: Card | null = null;
@@ -34,11 +37,14 @@ export class GameManager {
   constructor() {
     this.resourceManager = new ResourceManager();
     this.cardManager = new CardManager();
+    this.metaManager = new MetaManager();
     this.state = this.createInitialState();
 
     // Resource manager callback'lerini ayarla
     this.resourceManager.onResourceChange((resource, oldValue, newValue, change) => {
       this.emit('resourceChange', { resource, oldValue, newValue, change });
+      // Kaynak geçmişini kaydet
+      this.metaManager.recordResources(this.resourceManager.getAllResources());
     });
 
     this.resourceManager.onGameOver((resource, value) => {
@@ -67,6 +73,8 @@ export class GameManager {
     this.resourceManager.reset();
     this.cardManager.resetPlayedCards();
     this.state = this.createInitialState();
+    this.metaManager.startSession();
+    this.metaManager.recordResources(this.resourceManager.getAllResources());
     this.emit('gameStart');
     this.nextCard();
   }
@@ -92,10 +100,22 @@ export class GameManager {
       // Kart kalmadı - zafer!
       this.state.status = GameStatus.VICTORY;
       const ending = this.determineEnding();
+
+      // Meta sistem işleme
+      const gameEndReport = this.metaManager.processGameEnd(
+        this.state.turn,
+        this.state.score,
+        this.state.era,
+        ending.type,
+        this.state.characterStates,
+        this.state.flags
+      );
+
       this.emit('victory', {
         turn: this.state.turn,
         score: this.state.score,
-        ending
+        ending,
+        gameEndReport
       });
     }
   }
@@ -281,13 +301,26 @@ export class GameManager {
     // Bitişi belirle
     const ending = this.determineEnding();
 
+    // Meta sistem işleme
+    const gameEndReport = this.metaManager.processGameEnd(
+      this.state.turn,
+      this.state.score,
+      this.state.era,
+      ending.type,
+      this.state.characterStates,
+      this.state.flags,
+      resource,
+      value
+    );
+
     this.emit('gameOver', {
       resource,
       value,
       reason,
       turn: this.state.turn,
       score: this.state.score,
-      ending
+      ending,
+      gameEndReport
     });
   }
 
@@ -594,5 +627,30 @@ export class GameManager {
 
   getAllCharacterStates(): Map<string, CharacterState> {
     return new Map(this.state.characterStates);
+  }
+
+  // Meta sistem getter'ları
+  getMetaManager(): MetaManager {
+    return this.metaManager;
+  }
+
+  getCurrentPP(): number {
+    return this.metaManager.getCurrentPP();
+  }
+
+  getStatistics() {
+    return this.metaManager.getStatistics();
+  }
+
+  getUnlockedEras() {
+    return this.metaManager.getUnlockedEras();
+  }
+
+  isEraUnlocked(era: Era): boolean {
+    return this.metaManager.isEraUnlocked(era);
+  }
+
+  getAllAchievements() {
+    return this.metaManager.getAllAchievements();
   }
 }

@@ -220,3 +220,177 @@ export interface StoryBranch {
   excludedFlags: string[];
   endingType: EndingType;
 }
+
+// ============================================
+// FAZ 4: META SİSTEM TİPLERİ
+// ============================================
+
+// Başarım kategorileri
+export enum AchievementCategory {
+  SURVIVAL = 'survival',     // Hayatta kalma başarımları
+  EXTREME = 'extreme',       // Ekstrem stratejiler
+  STORY = 'story',           // Hikaye tamamlama
+  SECRET = 'secret',         // Gizli başarımlar
+  CHARACTER = 'character'    // Karakter etkileşimleri
+}
+
+// Başarım tanımı
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: AchievementCategory;
+  icon: string;
+  ppReward: number;           // Kazanılan Prestige Points
+  isSecret: boolean;          // Gizli mi?
+  condition: AchievementCondition;
+}
+
+// Başarım koşulu
+export interface AchievementCondition {
+  type: AchievementConditionType;
+  value?: number;
+  resource?: ResourceType;
+  characterId?: string;
+  flag?: string;
+  endingType?: EndingType;
+  era?: Era;
+}
+
+// Başarım koşul türleri
+export enum AchievementConditionType {
+  TURNS_SURVIVED = 'turns_survived',
+  TOTAL_CARDS_PLAYED = 'total_cards_played',
+  RESOURCE_REACHED = 'resource_reached',
+  RESOURCE_NEVER_BELOW = 'resource_never_below',
+  CHARACTER_INTERACTION_COUNT = 'character_interaction_count',
+  FLAG_SET = 'flag_set',
+  ENDING_REACHED = 'ending_reached',
+  GAMES_COMPLETED = 'games_completed',
+  TOTAL_PP_EARNED = 'total_pp_earned',
+  ERA_UNLOCKED = 'era_unlocked',
+  ALL_CHARACTERS_MET = 'all_characters_met',
+  SPECIFIC_SCORE = 'specific_score'
+}
+
+// Kazanılmış başarım
+export interface UnlockedAchievement {
+  achievementId: string;
+  unlockedAt: number;         // Timestamp
+  gameNumber: number;         // Hangi oyunda kazanıldı
+}
+
+// Dönem kilidi bilgisi
+export interface EraUnlock {
+  era: Era;
+  requiredPP: number;
+  isUnlocked: boolean;
+  unlockedAt?: number;
+}
+
+// Dönem PP gereksinimleri
+export const ERA_UNLOCK_REQUIREMENTS: Record<Era, number> = {
+  [Era.MEDIEVAL]: 0,       // Başlangıçta açık
+  [Era.RENAISSANCE]: 100,
+  [Era.INDUSTRIAL]: 250,
+  [Era.MODERN]: 500,
+  [Era.FUTURE]: 1000
+};
+
+// Oyun istatistikleri
+export interface GameStatistics {
+  // Genel istatistikler
+  totalGamesPlayed: number;
+  totalCardsPlayed: number;
+  totalTurnsSurvived: number;
+  longestRun: number;
+  highestScore: number;
+
+  // Kaynak istatistikleri
+  averageGold: number;
+  averageHappiness: number;
+  averageMilitary: number;
+  averageFaith: number;
+
+  // Ölüm sebepleri
+  deathsByResource: Record<ResourceType, number>;
+  deathsByExcess: Record<ResourceType, number>;
+
+  // Bitiş istatistikleri
+  endingsReached: Record<EndingType, number>;
+
+  // Karakter istatistikleri
+  characterInteractions: Record<string, number>;
+  favoriteCharacter: string;
+
+  // Dönem istatistikleri
+  gamesPerEra: Record<Era, number>;
+  favoriteEra: Era;
+
+  // PP istatistikleri
+  totalPPEarned: number;
+  ppSpent: number;
+  currentPP: number;
+
+  // Başarım istatistikleri
+  achievementsUnlocked: number;
+  totalAchievements: number;
+
+  // Zaman istatistikleri
+  firstPlayedAt: number;
+  lastPlayedAt: number;
+  totalPlayTime: number;       // Milisaniye cinsinden
+}
+
+// Oturum istatistikleri (tek oyun için)
+export interface SessionStatistics {
+  gameNumber: number;
+  era: Era;
+  turnsSurvived: number;
+  cardsPlayed: number;
+  score: number;
+  ppEarned: number;
+  endingReached: EndingType;
+  deathReason?: string;
+  charactersMet: string[];
+  flagsSet: string[];
+  duration: number;            // Milisaniye
+  startedAt: number;
+  endedAt: number;
+  resourceHistory: Resources[];
+  newAchievements: string[];
+}
+
+// Meta kaydetme verisi
+export interface MetaSaveData {
+  statistics: GameStatistics;
+  unlockedAchievements: UnlockedAchievement[];
+  unlockedEras: Era[];
+  sessionHistory: SessionStatistics[];
+  version: number;
+  savedAt: number;
+}
+
+// PP hesaplama sonucu
+export interface PPCalculation {
+  base: number;                // Temel PP (turlar)
+  bonuses: PPBonus[];          // Bonuslar
+  total: number;               // Toplam
+}
+
+// PP bonus türleri
+export interface PPBonus {
+  type: string;
+  description: string;
+  amount: number;
+}
+
+// Oyun sonu raporu
+export interface GameEndReport {
+  sessionStats: SessionStatistics;
+  ppCalculation: PPCalculation;
+  newAchievements: Achievement[];
+  newEraUnlocks: Era[];
+  previousPP: number;
+  newTotalPP: number;
+}
