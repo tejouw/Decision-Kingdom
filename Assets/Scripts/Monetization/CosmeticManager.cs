@@ -14,15 +14,18 @@ namespace DecisionKingdom.Monetization
         // Events
         public event Action<CardBackDesign> OnCardBackChanged;
         public event Action<UITheme> OnThemeChanged;
+        public event Action<PortraitStyle> OnPortraitStyleChanged;
         public event Action OnCosmeticsUnlocked;
 
         // Current selections
         private CardBackDesign currentCardBack;
         private UITheme currentTheme;
+        private PortraitStyle currentPortraitStyle;
 
         // Unlocked items
         private HashSet<CardBackDesign> unlockedCardBacks;
         private HashSet<UITheme> unlockedThemes;
+        private HashSet<PortraitStyle> unlockedPortraitStyles;
 
         // Initialization
         private bool isInitialized;
@@ -40,10 +43,12 @@ namespace DecisionKingdom.Monetization
         {
             unlockedCardBacks = new HashSet<CardBackDesign>();
             unlockedThemes = new HashSet<UITheme>();
+            unlockedPortraitStyles = new HashSet<PortraitStyle>();
 
             // Default items are always unlocked
             unlockedCardBacks.Add(CardBackDesign.Default);
             unlockedThemes.Add(UITheme.Default);
+            unlockedPortraitStyles.Add(PortraitStyle.Default);
 
             // Load saved data
             LoadCosmetics();
@@ -292,6 +297,201 @@ namespace DecisionKingdom.Monetization
 
         #endregion
 
+        #region Portrait Styles
+
+        /// <summary>
+        /// Set current portrait style
+        /// </summary>
+        public void SetPortraitStyle(PortraitStyle style)
+        {
+            if (!IsPortraitStyleUnlocked(style))
+            {
+                Debug.LogWarning($"[CosmeticManager] Portrait style not unlocked: {style}");
+                return;
+            }
+
+            currentPortraitStyle = style;
+            SaveCosmetics();
+
+            Debug.Log($"[CosmeticManager] Portrait style changed to: {style}");
+            OnPortraitStyleChanged?.Invoke(style);
+        }
+
+        /// <summary>
+        /// Get current portrait style
+        /// </summary>
+        public PortraitStyle GetCurrentPortraitStyle()
+        {
+            return currentPortraitStyle;
+        }
+
+        /// <summary>
+        /// Check if a portrait style is unlocked
+        /// </summary>
+        public bool IsPortraitStyleUnlocked(PortraitStyle style)
+        {
+            // Default is always unlocked
+            if (style == PortraitStyle.Default)
+            {
+                return true;
+            }
+
+            // Check if unlocked via purchase
+            return unlockedPortraitStyles.Contains(style);
+        }
+
+        /// <summary>
+        /// Unlock a portrait style
+        /// </summary>
+        public void UnlockPortraitStyle(PortraitStyle style)
+        {
+            if (unlockedPortraitStyles.Add(style))
+            {
+                SaveCosmetics();
+                Debug.Log($"[CosmeticManager] Portrait style unlocked: {style}");
+                OnCosmeticsUnlocked?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// Unlock portrait styles from a pack
+        /// </summary>
+        public void UnlockPortraitPack(int packNumber)
+        {
+            List<PortraitStyle> styles = GetPortraitPackContents(packNumber);
+            foreach (var style in styles)
+            {
+                unlockedPortraitStyles.Add(style);
+            }
+            SaveCosmetics();
+            Debug.Log($"[CosmeticManager] Portrait pack {packNumber} unlocked");
+            OnCosmeticsUnlocked?.Invoke();
+        }
+
+        /// <summary>
+        /// Get portrait styles in a pack
+        /// </summary>
+        private List<PortraitStyle> GetPortraitPackContents(int packNumber)
+        {
+            var styles = new List<PortraitStyle>();
+
+            switch (packNumber)
+            {
+                case 1: // Classic Pack - Historical illustrations
+                    styles.Add(PortraitStyle.Classic);
+                    styles.Add(PortraitStyle.Medieval);
+                    styles.Add(PortraitStyle.Renaissance);
+                    break;
+                case 2: // Modern Pack - Digital art styles
+                    styles.Add(PortraitStyle.Anime);
+                    styles.Add(PortraitStyle.Realistic);
+                    styles.Add(PortraitStyle.Cartoon);
+                    break;
+                case 3: // Special Pack - Unique styles
+                    styles.Add(PortraitStyle.Pixel);
+                    styles.Add(PortraitStyle.Watercolor);
+                    styles.Add(PortraitStyle.Noir);
+                    break;
+            }
+
+            return styles;
+        }
+
+        /// <summary>
+        /// Unlock all portrait styles
+        /// </summary>
+        public void UnlockAllPortraitStyles()
+        {
+            foreach (PortraitStyle style in Enum.GetValues(typeof(PortraitStyle)))
+            {
+                unlockedPortraitStyles.Add(style);
+            }
+            SaveCosmetics();
+            Debug.Log("[CosmeticManager] All portrait styles unlocked");
+            OnCosmeticsUnlocked?.Invoke();
+        }
+
+        /// <summary>
+        /// Get all unlocked portrait styles
+        /// </summary>
+        public List<PortraitStyle> GetUnlockedPortraitStyles()
+        {
+            return new List<PortraitStyle>(unlockedPortraitStyles);
+        }
+
+        /// <summary>
+        /// Get all portrait styles (locked and unlocked)
+        /// </summary>
+        public List<PortraitStyle> GetAllPortraitStyles()
+        {
+            var styles = new List<PortraitStyle>();
+            foreach (PortraitStyle style in Enum.GetValues(typeof(PortraitStyle)))
+            {
+                styles.Add(style);
+            }
+            return styles;
+        }
+
+        /// <summary>
+        /// Get localized portrait style name
+        /// </summary>
+        public string GetPortraitStyleName(PortraitStyle style, bool turkish = true)
+        {
+            if (turkish)
+            {
+                return style switch
+                {
+                    PortraitStyle.Default => "Varsayılan",
+                    PortraitStyle.Classic => "Klasik",
+                    PortraitStyle.Medieval => "Ortaçağ",
+                    PortraitStyle.Renaissance => "Rönesans",
+                    PortraitStyle.Anime => "Anime",
+                    PortraitStyle.Realistic => "Gerçekçi",
+                    PortraitStyle.Cartoon => "Karikatür",
+                    PortraitStyle.Pixel => "Piksel",
+                    PortraitStyle.Watercolor => "Suluboya",
+                    PortraitStyle.Noir => "Noir",
+                    _ => style.ToString()
+                };
+            }
+            return style.ToString();
+        }
+
+        /// <summary>
+        /// Get portrait style description
+        /// </summary>
+        public string GetPortraitStyleDescription(PortraitStyle style, bool turkish = true)
+        {
+            if (turkish)
+            {
+                return style switch
+                {
+                    PortraitStyle.Default => "Standart karakter portreleri",
+                    PortraitStyle.Classic => "Tarihi yağlı boya tarzı portreler",
+                    PortraitStyle.Medieval => "Ortaçağ el yazması illustrasyonları",
+                    PortraitStyle.Renaissance => "Rönesans dönemi sanat stili",
+                    PortraitStyle.Anime => "Japon anime çizim stili",
+                    PortraitStyle.Realistic => "Fotogerçekçi dijital sanat",
+                    PortraitStyle.Cartoon => "Renkli karikatür stili",
+                    PortraitStyle.Pixel => "Retro pixel art stili",
+                    PortraitStyle.Watercolor => "Suluboya resim stili",
+                    PortraitStyle.Noir => "Siyah-beyaz film noir stili",
+                    _ => ""
+                };
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Get total unlocked portrait styles
+        /// </summary>
+        public int GetTotalUnlockedPortraitStyles()
+        {
+            return unlockedPortraitStyles.Count;
+        }
+
+        #endregion
+
         #region Theme Colors
 
         /// <summary>
@@ -458,8 +658,10 @@ namespace DecisionKingdom.Monetization
             {
                 currentCardBack = currentCardBack,
                 currentTheme = currentTheme,
+                currentPortraitStyle = currentPortraitStyle,
                 unlockedCardBacks = new List<CardBackDesign>(unlockedCardBacks),
-                unlockedThemes = new List<UITheme>(unlockedThemes)
+                unlockedThemes = new List<UITheme>(unlockedThemes),
+                unlockedPortraitStyles = new List<PortraitStyle>(unlockedPortraitStyles)
             };
 
             string json = JsonUtility.ToJson(data);
@@ -486,6 +688,7 @@ namespace DecisionKingdom.Monetization
                     {
                         currentCardBack = data.currentCardBack;
                         currentTheme = data.currentTheme;
+                        currentPortraitStyle = data.currentPortraitStyle;
 
                         if (data.unlockedCardBacks != null)
                         {
@@ -497,9 +700,15 @@ namespace DecisionKingdom.Monetization
                             unlockedThemes = new HashSet<UITheme>(data.unlockedThemes);
                         }
 
+                        if (data.unlockedPortraitStyles != null)
+                        {
+                            unlockedPortraitStyles = new HashSet<PortraitStyle>(data.unlockedPortraitStyles);
+                        }
+
                         // Ensure defaults are always available
                         unlockedCardBacks.Add(CardBackDesign.Default);
                         unlockedThemes.Add(UITheme.Default);
+                        unlockedPortraitStyles.Add(PortraitStyle.Default);
                     }
 
                     Debug.Log("[CosmeticManager] Cosmetics loaded");
@@ -509,12 +718,14 @@ namespace DecisionKingdom.Monetization
                     Debug.LogError($"[CosmeticManager] Failed to load cosmetics: {e.Message}");
                     currentCardBack = CardBackDesign.Default;
                     currentTheme = UITheme.Default;
+                    currentPortraitStyle = PortraitStyle.Default;
                 }
             }
             else
             {
                 currentCardBack = CardBackDesign.Default;
                 currentTheme = UITheme.Default;
+                currentPortraitStyle = PortraitStyle.Default;
             }
         }
 
@@ -525,10 +736,12 @@ namespace DecisionKingdom.Monetization
         {
             currentCardBack = CardBackDesign.Default;
             currentTheme = UITheme.Default;
+            currentPortraitStyle = PortraitStyle.Default;
             SaveCosmetics();
 
             OnCardBackChanged?.Invoke(currentCardBack);
             OnThemeChanged?.Invoke(currentTheme);
+            OnPortraitStyleChanged?.Invoke(currentPortraitStyle);
 
             Debug.Log("[CosmeticManager] Reset to defaults");
         }
@@ -559,8 +772,9 @@ namespace DecisionKingdom.Monetization
         public float GetUnlockPercentage()
         {
             int totalItems = Enum.GetValues(typeof(CardBackDesign)).Length +
-                            Enum.GetValues(typeof(UITheme)).Length;
-            int unlockedItems = unlockedCardBacks.Count + unlockedThemes.Count;
+                            Enum.GetValues(typeof(UITheme)).Length +
+                            Enum.GetValues(typeof(PortraitStyle)).Length;
+            int unlockedItems = unlockedCardBacks.Count + unlockedThemes.Count + unlockedPortraitStyles.Count;
 
             return (float)unlockedItems / totalItems * 100f;
         }
@@ -583,8 +797,10 @@ namespace DecisionKingdom.Monetization
         {
             public CardBackDesign currentCardBack;
             public UITheme currentTheme;
+            public PortraitStyle currentPortraitStyle;
             public List<CardBackDesign> unlockedCardBacks;
             public List<UITheme> unlockedThemes;
+            public List<PortraitStyle> unlockedPortraitStyles;
         }
 
         #endregion

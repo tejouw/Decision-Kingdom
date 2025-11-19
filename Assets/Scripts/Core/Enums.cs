@@ -311,6 +311,23 @@ namespace DecisionKingdom.Core
     }
 
     /// <summary>
+    /// Karakter portre stilleri
+    /// </summary>
+    public enum PortraitStyle
+    {
+        Default,                // Varsayılan stil
+        Classic,                // Klasik yağlı boya
+        Medieval,               // Ortaçağ el yazması
+        Renaissance,            // Rönesans dönemi
+        Anime,                  // Anime çizim
+        Realistic,              // Gerçekçi dijital
+        Cartoon,                // Karikatür stili
+        Pixel,                  // Pixel art
+        Watercolor,             // Suluboya
+        Noir                    // Film noir siyah-beyaz
+    }
+
+    /// <summary>
     /// Satın alma durumu
     /// </summary>
     public enum PurchaseState
