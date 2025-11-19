@@ -8,6 +8,8 @@ import {
   SaveData,
   Card,
   Choice,
+  GameFlag,
+  FlagType,
   RESOURCE_DEFAULT,
   RESOURCE_NAMES
 } from '../models/types.js';
@@ -48,9 +50,11 @@ export class GameManager {
       era: Era.MEDIEVAL,
       status: GameStatus.PLAYING,
       characterStates: new Map(),
-      flags: new Set(),
+      flags: new Map(),
       eventHistory: [],
-      score: 0
+      score: 0,
+      cardCooldowns: new Map(),
+      totalCardsPlayed: 0
     };
   }
 
@@ -68,17 +72,59 @@ export class GameManager {
     const card = this.cardManager.getNextCard(
       this.resourceManager,
       this.state.turn,
-      this.state.flags
+      this.state.flags,
+      this.state.characterStates,
+      this.state.era
     );
 
     if (card) {
       this.currentCard = card;
-      this.emit('newCard', card);
+
+      // Karakter hafızası varsa metni güncelle
+      const modifiedCard = this.applyCharacterMemory(card);
+
+      this.emit('newCard', modifiedCard);
     } else {
       // Kart kalmadı - zafer!
       this.state.status = GameStatus.VICTORY;
       this.emit('victory', { turn: this.state.turn, score: this.state.score });
     }
+  }
+
+  // Karakter hafızasını uygula
+  private applyCharacterMemory(card: Card): Card {
+    const charState = this.state.characterStates.get(card.character.id);
+
+    if (!charState || charState.interactionCount === 0) {
+      return card;
+    }
+
+    // Hafıza metni varsa ve karakter daha önce etkileşime girdiyse
+    if (card.memoryText && charState.interactionCount > 0) {
+      return {
+        ...card,
+        text: `${card.memoryText}\n\n${card.text}`
+      };
+    }
+
+    // İlişki durumuna göre ek metin
+    let relationshipPrefix = '';
+    if (charState.relationship > 50) {
+      relationshipPrefix = `${card.character.name} size güvenle yaklaşıyor. `;
+    } else if (charState.relationship < -50) {
+      relationshipPrefix = `${card.character.name} size mesafeli duruyor. `;
+    } else if (charState.interactionCount >= 3) {
+      relationshipPrefix = `${card.character.name} sizi tanıyor. `;
+    }
+
+    if (relationshipPrefix) {
+      return {
+        ...card,
+        text: relationshipPrefix + card.text
+      };
+    }
+
+    return card;
   }
 
   // Seçim yap
@@ -95,13 +141,22 @@ export class GameManager {
     // Event history'ye ekle
     this.state.eventHistory.push(this.currentCard.id);
 
+    // Kartı oynanmış olarak işaretle
+    this.cardManager.markCardAsPlayed(this.currentCard.id, this.state.turn);
+
     // Karakter durumunu güncelle
-    this.updateCharacterState(this.currentCard.character.id);
+    this.updateCharacterState(this.currentCard.character.id, choice, this.currentCard.id);
+
+    // Flag'leri işle
+    this.processChoiceFlags(choice);
 
     // Triggered events ekle
     if (choice.triggeredEvents) {
       this.cardManager.addTriggeredEvents(choice.triggeredEvents);
     }
+
+    // Toplam oynanan kart sayısını artır
+    this.state.totalCardsPlayed++;
 
     // Turu artır
     this.state.turn++;
@@ -140,7 +195,7 @@ export class GameManager {
   }
 
   // Karakter durumunu güncelle
-  private updateCharacterState(characterId: string): void {
+  private updateCharacterState(characterId: string, choice: Choice, cardId: string): void {
     let charState = this.state.characterStates.get(characterId);
 
     if (!charState) {
@@ -148,14 +203,48 @@ export class GameManager {
         characterId,
         interactionCount: 0,
         lastInteractionTurn: 0,
-        relationship: 0
+        relationship: 0,
+        flags: [],
+        decisions: []
       };
     }
 
     charState.interactionCount++;
     charState.lastInteractionTurn = this.state.turn;
+    charState.decisions.push(cardId);
+
+    // İlişki değişimini uygula
+    if (choice.relationshipChange) {
+      charState.relationship = Math.max(-100, Math.min(100,
+        charState.relationship + choice.relationshipChange
+      ));
+    }
 
     this.state.characterStates.set(characterId, charState);
+
+    // Karakter etkileşim eventini emit et
+    this.emit('characterInteraction', {
+      characterId,
+      interactionCount: charState.interactionCount,
+      relationship: charState.relationship
+    });
+  }
+
+  // Seçim flag'lerini işle
+  private processChoiceFlags(choice: Choice): void {
+    // Flag'leri ayarla
+    if (choice.setFlags) {
+      for (const flagName of choice.setFlags) {
+        this.setFlag(flagName, FlagType.PERSISTENT);
+      }
+    }
+
+    // Flag'leri kaldır
+    if (choice.removeFlags) {
+      for (const flagName of choice.removeFlags) {
+        this.removeFlag(flagName);
+      }
+    }
   }
 
   // Skor hesapla
@@ -166,7 +255,9 @@ export class GameManager {
       return sum + (50 - Math.abs(val - 50));
     }, 0);
 
-    return this.state.turn * 10 + balance;
+    // Tur bonusu + denge bonusu + karakter çeşitliliği bonusu
+    const characterBonus = this.state.characterStates.size * 5;
+    return this.state.turn * 10 + balance + characterBonus;
   }
 
   // Game over
@@ -187,21 +278,80 @@ export class GameManager {
     });
   }
 
-  // Flag ayarla
-  setFlag(flag: string): void {
-    this.state.flags.add(flag);
+  // Flag ayarla (geliştirilmiş)
+  setFlag(flagName: string, type: FlagType = FlagType.PERSISTENT): void {
+    const flag: GameFlag = {
+      name: flagName,
+      type,
+      value: true,
+      setAt: this.state.turn
+    };
+    this.state.flags.set(flagName, flag);
     this.emit('flagSet', flag);
   }
 
   // Flag kaldır
-  removeFlag(flag: string): void {
-    this.state.flags.delete(flag);
-    this.emit('flagRemoved', flag);
+  removeFlag(flagName: string): void {
+    this.state.flags.delete(flagName);
+    this.emit('flagRemoved', flagName);
   }
 
   // Flag kontrol
-  hasFlag(flag: string): boolean {
-    return this.state.flags.has(flag);
+  hasFlag(flagName: string): boolean {
+    return this.state.flags.has(flagName);
+  }
+
+  // Flag al
+  getFlag(flagName: string): GameFlag | undefined {
+    return this.state.flags.get(flagName);
+  }
+
+  // Tüm flag'leri al
+  getAllFlags(): Map<string, GameFlag> {
+    return new Map(this.state.flags);
+  }
+
+  // Geçici flag'leri temizle
+  clearTemporaryFlags(): void {
+    for (const [name, flag] of this.state.flags) {
+      if (flag.type === FlagType.TEMPORARY) {
+        this.state.flags.delete(name);
+      }
+    }
+  }
+
+  // Karakter durumunu al
+  getCharacterState(characterId: string): CharacterState | undefined {
+    return this.state.characterStates.get(characterId);
+  }
+
+  // Karakter ilişkisini değiştir
+  modifyCharacterRelationship(characterId: string, change: number): void {
+    const charState = this.state.characterStates.get(characterId);
+    if (charState) {
+      charState.relationship = Math.max(-100, Math.min(100,
+        charState.relationship + change
+      ));
+      this.emit('relationshipChange', {
+        characterId,
+        newRelationship: charState.relationship,
+        change
+      });
+    }
+  }
+
+  // Karakter flag'i ayarla
+  setCharacterFlag(characterId: string, flag: string): void {
+    const charState = this.state.characterStates.get(characterId);
+    if (charState && !charState.flags.includes(flag)) {
+      charState.flags.push(flag);
+    }
+  }
+
+  // Karakter flag'i kontrol
+  hasCharacterFlag(characterId: string, flag: string): boolean {
+    const charState = this.state.characterStates.get(characterId);
+    return charState ? charState.flags.includes(flag) : false;
   }
 
   // Oyunu duraklat
@@ -228,10 +378,12 @@ export class GameManager {
       era: this.state.era,
       status: this.state.status,
       characterStates: Array.from(this.state.characterStates.entries()),
-      flags: Array.from(this.state.flags),
+      flags: Array.from(this.state.flags.entries()),
       eventHistory: this.state.eventHistory,
       score: this.state.score,
-      savedAt: Date.now()
+      savedAt: Date.now(),
+      cardCooldowns: Array.from(this.cardManager.getCooldowns().entries()),
+      totalCardsPlayed: this.state.totalCardsPlayed
     };
 
     try {
@@ -259,10 +411,15 @@ export class GameManager {
         era: saveData.era,
         status: saveData.status,
         characterStates: new Map(saveData.characterStates),
-        flags: new Set(saveData.flags),
+        flags: new Map(saveData.flags),
         eventHistory: saveData.eventHistory,
-        score: saveData.score
+        score: saveData.score,
+        cardCooldowns: new Map(saveData.cardCooldowns || []),
+        totalCardsPlayed: saveData.totalCardsPlayed || 0
       };
+
+      // CardManager state'ini yükle
+      this.cardManager.loadCooldowns(this.state.cardCooldowns);
 
       this.emit('gameLoaded', saveData);
       this.nextCard();
@@ -333,5 +490,17 @@ export class GameManager {
 
   getCardManager(): CardManager {
     return this.cardManager;
+  }
+
+  getEra(): Era {
+    return this.state.era;
+  }
+
+  getTotalCardsPlayed(): number {
+    return this.state.totalCardsPlayed;
+  }
+
+  getAllCharacterStates(): Map<string, CharacterState> {
+    return new Map(this.state.characterStates);
   }
 }

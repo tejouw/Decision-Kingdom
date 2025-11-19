@@ -35,6 +35,9 @@ export interface Choice {
   text: string;
   effects: ResourceEffect[];
   triggeredEvents?: string[];
+  setFlags?: string[];
+  removeFlags?: string[];
+  relationshipChange?: number; // Karakter ilişkisine etki (-100 to 100)
 }
 
 // Koşul türleri
@@ -42,8 +45,28 @@ export enum ConditionType {
   RESOURCE_ABOVE = 'resource_above',
   RESOURCE_BELOW = 'resource_below',
   TURN_ABOVE = 'turn_above',
+  TURN_BELOW = 'turn_below',
   FLAG_SET = 'flag_set',
-  FLAG_NOT_SET = 'flag_not_set'
+  FLAG_NOT_SET = 'flag_not_set',
+  CHARACTER_INTERACTION = 'character_interaction',
+  CHARACTER_RELATIONSHIP_ABOVE = 'character_relationship_above',
+  CHARACTER_RELATIONSHIP_BELOW = 'character_relationship_below',
+  ERA = 'era'
+}
+
+// Event kategorileri
+export enum EventCategory {
+  STORY = 'story',           // Ana hikaye olayları
+  RANDOM = 'random',         // Rastgele krizler
+  CHARACTER = 'character',   // Karakter spesifik
+  CHAIN = 'chain',           // Zincirleme olaylar
+  RARE = 'rare'              // Nadir olaylar
+}
+
+// Flag türleri
+export enum FlagType {
+  PERSISTENT = 'persistent', // Oyun boyunca kalıcı
+  TEMPORARY = 'temporary'    // Oturum boyunca
 }
 
 // Koşul
@@ -52,6 +75,16 @@ export interface Condition {
   resource?: ResourceType;
   value?: number;
   flag?: string;
+  characterId?: string;
+  era?: Era;
+}
+
+// Flag verisi
+export interface GameFlag {
+  name: string;
+  type: FlagType;
+  value: boolean;
+  setAt?: number; // Tur numarası
 }
 
 // Karakter
@@ -71,6 +104,11 @@ export interface Card {
   rightChoice: Choice;
   conditions?: Condition[];
   priority?: number;
+  weight?: number;           // Seçilme ağırlığı (default: 1)
+  category?: EventCategory;  // Event kategorisi
+  isRepeatable?: boolean;    // Tekrar oynanabilir mi?
+  cooldown?: number;         // Kaç tur sonra tekrar çıkabilir
+  memoryText?: string;       // Karakter hatırlama metni
 }
 
 // Kaynaklar
@@ -87,6 +125,8 @@ export interface CharacterState {
   interactionCount: number;
   lastInteractionTurn: number;
   relationship: number; // -100 to 100
+  flags: string[];      // Karakter spesifik flagler
+  decisions: string[];  // Karakter ile ilgili alınan kararlar (kart ID'leri)
 }
 
 // Oyun durumu
@@ -96,9 +136,11 @@ export interface GameState {
   era: Era;
   status: GameStatus;
   characterStates: Map<string, CharacterState>;
-  flags: Set<string>;
+  flags: Map<string, GameFlag>;
   eventHistory: string[];
   score: number;
+  cardCooldowns: Map<string, number>; // cardId -> kullanılabilir olacağı tur
+  totalCardsPlayed: number;
 }
 
 // Kaydetme verisi
@@ -108,10 +150,12 @@ export interface SaveData {
   era: Era;
   status: GameStatus;
   characterStates: [string, CharacterState][];
-  flags: string[];
+  flags: [string, GameFlag][];
   eventHistory: string[];
   score: number;
   savedAt: number;
+  cardCooldowns: [string, number][];
+  totalCardsPlayed: number;
 }
 
 // Kaynak sabitleri
