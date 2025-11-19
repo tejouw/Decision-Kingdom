@@ -1,6 +1,54 @@
 import { GameManager } from './core/GameManager.js';
 import { GameUI } from './ui/GameUI.js';
 import { medievalCards } from './data/medievalCards.js';
+import { renaissanceCards } from './data/renaissanceCards.js';
+import { industrialCards } from './data/industrialCards.js';
+import { modernCards } from './data/modernCards.js';
+import { futureCards } from './data/futureCards.js';
+import { Era, Card } from './models/types.js';
+
+// Era bazlı kartları al
+function getCardsByEra(era: Era): Card[] {
+  switch (era) {
+    case Era.MEDIEVAL:
+      return medievalCards;
+    case Era.RENAISSANCE:
+      return renaissanceCards;
+    case Era.INDUSTRIAL:
+      return industrialCards;
+    case Era.MODERN:
+      return modernCards;
+    case Era.FUTURE:
+      return futureCards;
+    default:
+      return medievalCards;
+  }
+}
+
+// Kartlara era bilgisi ekle
+function addEraToCards(cards: Card[], era: Era): Card[] {
+  return cards.map(card => ({ ...card, era }));
+}
+
+// Tüm kartları al (era bilgisi ile)
+function getAllCards(): Card[] {
+  return [
+    ...addEraToCards(medievalCards, Era.MEDIEVAL),
+    ...addEraToCards(renaissanceCards, Era.RENAISSANCE),
+    ...addEraToCards(industrialCards, Era.INDUSTRIAL),
+    ...addEraToCards(modernCards, Era.MODERN),
+    ...addEraToCards(futureCards, Era.FUTURE)
+  ];
+}
+
+// Era isimleri (Türkçe)
+const ERA_NAMES: Record<Era, string> = {
+  [Era.MEDIEVAL]: 'Ortaçağ',
+  [Era.RENAISSANCE]: 'Rönesans',
+  [Era.INDUSTRIAL]: 'Sanayi Devrimi',
+  [Era.MODERN]: 'Modern Çağ',
+  [Era.FUTURE]: 'Gelecek'
+};
 
 // Ana oyun başlatma fonksiyonu
 function initGame(): void {
@@ -9,9 +57,15 @@ function initGame(): void {
   // GameManager oluştur
   const gameManager = new GameManager();
 
-  // Kartları yükle
-  gameManager.loadCards(medievalCards);
-  console.log(`${medievalCards.length} kart yüklendi.`);
+  // Tüm kartları yükle (CardManager era'ya göre filtreleyecek)
+  const allCards = getAllCards();
+  gameManager.loadCards(allCards);
+  console.log(`Toplam ${allCards.length} kart yüklendi.`);
+  console.log(`- Ortaçağ: ${medievalCards.length}`);
+  console.log(`- Rönesans: ${renaissanceCards.length}`);
+  console.log(`- Sanayi Devrimi: ${industrialCards.length}`);
+  console.log(`- Modern Çağ: ${modernCards.length}`);
+  console.log(`- Gelecek: ${futureCards.length}`);
 
   // UI oluştur
   const gameUI = new GameUI('game-root', gameManager);
