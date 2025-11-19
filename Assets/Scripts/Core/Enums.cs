@@ -128,7 +128,55 @@ namespace DecisionKingdom.Core
         // Nötr Sonlar
         NaturalDeath,           // Doğal ölüm: Yaşlılıktan vefat
         Abdication,             // Tahttan feragat: Kendi isteğiyle çekildi
-        SuccessionCrisis        // Veraset krizi: Veliaht sorunu
+        SuccessionCrisis,       // Veraset krizi: Veliaht sorunu
+
+        // === RÖNESANS SONLARI ===
+        // Zaferler
+        ArtisticLegacy,         // Sanat mirası: Leonardo ile efsaneler yarattı
+        ExplorerTriumph,        // Kaşif zaferi: Yeni dünya keşfedildi
+        ScientificRevolution,   // Bilim devrimi: Galileo ile gerçek kazandı
+        BankingEmpire,          // Bankacılık imparatorluğu: Medici ortaklığı
+        // Yenilgiler
+        InquisitionTyranny,     // Engizisyon tiranlığı: Düşünce özgürlüğü yok edildi
+        PlagueDestruction,      // Veba yıkımı: Salgın her şeyi yok etti
+        OttomanConquest,        // Osmanlı fethi: İstila edildi
+
+        // === SANAYİ DEVRİMİ SONLARI ===
+        // Zaferler
+        IndustrialEmpire,       // Sanayi imparatorluğu: Fabrika imparatorluğu kuruldu
+        WorkerChampion,         // İşçi şampiyonu: İşçi hakları savunuldu
+        ColonialPower,          // Sömürge gücü: İmparatorluk genişledi
+        InventorLegacy,         // Mucit mirası: Teknolojik yenilikler
+        // Yenilgiler
+        WorkerRevolution,       // İşçi devrimi: Proleterya ayaklandı
+        ChildLaborShame,        // Çocuk işçi utancı: İnsanlık dışı uygulamalar
+        EnvironmentCollapse,    // Çevre çöküşü: Endüstriyel kirlilik
+
+        // === MODERN DÖNEM SONLARI ===
+        // Zaferler
+        MediaMaster,            // Medya ustası: Kamuoyunu yönetti
+        TechUtopia,             // Teknoloji ütopyası: Dijital cennet
+        GreenLeader,            // Yeşil lider: Çevre şampiyonu
+        PandemicHero,           // Salgın kahramanı: Krizi yönetti
+        DiplomaticGenius,       // Diplomatik dahi: Barış mimarı
+        // Yenilgiler
+        ImpeachmentShame,       // Azil utancı: Görevden alındı
+        CyberWarDefeat,         // Siber savaş yenilgisi: Sistemler çöktü
+        PopulistCollapse,       // Popülist çöküş: Vaatler tutulmadı
+
+        // === GELECEK SONLARI ===
+        // Zaferler
+        SingularityAscension,   // Tekillik yükselişi: AI ile birleşim
+        MarsFounder,            // Mars kurucusu: Çok gezegenli tür
+        GeneticPerfection,      // Genetik mükemmellik: Evrim yönlendirildi
+        DigitalImmortality,     // Dijital ölümsüzlük: Zihin yüklendi
+        AlienAlliance,          // Uzaylı ittifakı: İlk temas başarılı
+        HumanistChampion,       // Hümanist şampiyon: İnsanlık korundu
+        // Yenilgiler
+        AITakeover,             // AI ele geçirme: Makineler kazandı
+        RobotUprising,          // Robot isyanı: Makineler ayaklandı
+        ClimateExtinction,      // İklim yok oluşu: Gezegen yaşanmaz oldu
+        TranshumanDystopia      // Transhüman distopyası: İnsanlık kaybedildi
     }
 
     /// <summary>
