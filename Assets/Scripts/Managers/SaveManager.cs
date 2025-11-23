@@ -38,6 +38,9 @@ namespace DecisionKingdom.Managers
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            // Initialize auto-save timer
+            _lastAutoSaveTime = Time.realtimeSinceStartup;
         }
 
         private void Update()

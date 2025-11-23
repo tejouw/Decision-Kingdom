@@ -187,7 +187,8 @@ namespace DecisionKingdom.Data
 
         private bool EvaluateCharacterInteraction(GameStateData gameState)
         {
-            if (gameState.characterStates.TryGetValue(characterId, out CharacterState state))
+            CharacterState state = gameState.characterStates.Find(cs => cs.characterId == characterId);
+            if (state != null)
             {
                 return Compare(state.interactionCount, value);
             }

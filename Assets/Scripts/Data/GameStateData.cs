@@ -19,17 +19,17 @@ namespace DecisionKingdom.Data
         [Tooltip("Mevcut dönem")]
         public Era era;
 
-        [Tooltip("Karakter durumları")]
-        public Dictionary<string, CharacterState> characterStates;
+        [Tooltip("Karakter durumları (serializable list)")]
+        public List<CharacterState> characterStates;
 
         [Tooltip("Aktif flag'ler")]
-        public HashSet<string> flags;
+        public List<string> flags;
 
         [Tooltip("Oynanmış event ID'leri")]
         public List<string> eventHistory;
 
         [Tooltip("Tetiklenmiş event kuyruğu")]
-        public Queue<string> triggeredEventQueue;
+        public List<string> triggeredEventQueue;
 
         [Tooltip("Oyun durumu")]
         public GameState gameState;
@@ -54,10 +54,10 @@ namespace DecisionKingdom.Data
             resources = new Resources();
             turn = 1;
             era = Era.Medieval;
-            characterStates = new Dictionary<string, CharacterState>();
-            flags = new HashSet<string>();
+            characterStates = new List<CharacterState>();
+            flags = new List<string>();
             eventHistory = new List<string>();
-            triggeredEventQueue = new Queue<string>();
+            triggeredEventQueue = new List<string>();
             gameState = GameState.MainMenu;
             gameOverReason = GameOverReason.None;
             endingType = EndingType.None;
@@ -116,10 +116,11 @@ namespace DecisionKingdom.Data
         /// </summary>
         public CharacterState GetOrCreateCharacterState(string characterId)
         {
-            if (!characterStates.TryGetValue(characterId, out CharacterState state))
+            CharacterState state = characterStates.Find(cs => cs.characterId == characterId);
+            if (state == null)
             {
                 state = new CharacterState(characterId);
-                characterStates[characterId] = state;
+                characterStates.Add(state);
             }
             return state;
         }
@@ -129,7 +130,10 @@ namespace DecisionKingdom.Data
         /// </summary>
         public void AddFlag(string flag)
         {
-            flags.Add(flag);
+            if (!flags.Contains(flag))
+            {
+                flags.Add(flag);
+            }
         }
 
         /// <summary>
@@ -153,7 +157,7 @@ namespace DecisionKingdom.Data
         /// </summary>
         public void QueueTriggeredEvent(string eventId)
         {
-            triggeredEventQueue.Enqueue(eventId);
+            triggeredEventQueue.Add(eventId);
         }
 
         /// <summary>
@@ -161,7 +165,13 @@ namespace DecisionKingdom.Data
         /// </summary>
         public string DequeueTriggeredEvent()
         {
-            return triggeredEventQueue.Count > 0 ? triggeredEventQueue.Dequeue() : null;
+            if (triggeredEventQueue.Count > 0)
+            {
+                string eventId = triggeredEventQueue[0];
+                triggeredEventQueue.RemoveAt(0);
+                return eventId;
+            }
+            return null;
         }
 
         /// <summary>
@@ -269,8 +279,8 @@ namespace DecisionKingdom.Data
         public int totalGamesPlayed;
         public int totalDeaths;
         public int longestSurvival;
-        public Dictionary<GameOverReason, int> deathCauses;
-        public Dictionary<Era, int> gamesPerEra;
+        public List<DeathCauseCount> deathCauses;
+        public List<EraGameCount> gamesPerEra;
         public float averageGold;
         public float averageHappiness;
         public float averageMilitary;
@@ -282,8 +292,8 @@ namespace DecisionKingdom.Data
             totalGamesPlayed = 0;
             totalDeaths = 0;
             longestSurvival = 0;
-            deathCauses = new Dictionary<GameOverReason, int>();
-            gamesPerEra = new Dictionary<Era, int>();
+            deathCauses = new List<DeathCauseCount>();
+            gamesPerEra = new List<EraGameCount>();
             averageGold = 50f;
             averageHappiness = 50f;
             averageMilitary = 50f;
@@ -301,14 +311,22 @@ namespace DecisionKingdom.Data
             if (gameState.gameOverReason != GameOverReason.None)
             {
                 totalDeaths++;
-                if (!deathCauses.ContainsKey(gameState.gameOverReason))
-                    deathCauses[gameState.gameOverReason] = 0;
-                deathCauses[gameState.gameOverReason]++;
+                DeathCauseCount causeCount = deathCauses.Find(dc => dc.reason == gameState.gameOverReason);
+                if (causeCount == null)
+                {
+                    causeCount = new DeathCauseCount { reason = gameState.gameOverReason, count = 0 };
+                    deathCauses.Add(causeCount);
+                }
+                causeCount.count++;
             }
 
-            if (!gamesPerEra.ContainsKey(gameState.era))
-                gamesPerEra[gameState.era] = 0;
-            gamesPerEra[gameState.era]++;
+            EraGameCount eraCount = gamesPerEra.Find(eg => eg.era == gameState.era);
+            if (eraCount == null)
+            {
+                eraCount = new EraGameCount { era = gameState.era, count = 0 };
+                gamesPerEra.Add(eraCount);
+            }
+            eraCount.count++;
         }
     }
 
@@ -318,19 +336,19 @@ namespace DecisionKingdom.Data
     [System.Serializable]
     public class UnlockData
     {
-        public HashSet<Era> unlockedEras;
-        public HashSet<string> unlockedScenarios;
-        public HashSet<string> unlockedCharacters;
-        public HashSet<string> unlockedAchievements;
-        public HashSet<string> unlockedCosmetics;
+        public List<Era> unlockedEras;
+        public List<string> unlockedScenarios;
+        public List<string> unlockedCharacters;
+        public List<string> unlockedAchievements;
+        public List<string> unlockedCosmetics;
 
         public UnlockData()
         {
-            unlockedEras = new HashSet<Era> { Era.Medieval };
-            unlockedScenarios = new HashSet<string> { "good_king" };
-            unlockedCharacters = new HashSet<string>();
-            unlockedAchievements = new HashSet<string>();
-            unlockedCosmetics = new HashSet<string>();
+            unlockedEras = new List<Era> { Era.Medieval };
+            unlockedScenarios = new List<string> { "good_king" };
+            unlockedCharacters = new List<string>();
+            unlockedAchievements = new List<string>();
+            unlockedCosmetics = new List<string>();
         }
 
         public bool IsEraUnlocked(Era era)
@@ -340,7 +358,30 @@ namespace DecisionKingdom.Data
 
         public void UnlockEra(Era era)
         {
-            unlockedEras.Add(era);
+            if (!unlockedEras.Contains(era))
+            {
+                unlockedEras.Add(era);
+            }
         }
+    }
+
+    /// <summary>
+    /// Ölüm sebebi sayacı (Dictionary yerine kullanılır)
+    /// </summary>
+    [System.Serializable]
+    public class DeathCauseCount
+    {
+        public GameOverReason reason;
+        public int count;
+    }
+
+    /// <summary>
+    /// Dönem oyun sayacı (Dictionary yerine kullanılır)
+    /// </summary>
+    [System.Serializable]
+    public class EraGameCount
+    {
+        public Era era;
+        public int count;
     }
 }

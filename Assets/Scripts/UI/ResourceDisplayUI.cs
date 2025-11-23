@@ -62,7 +62,8 @@ namespace DecisionKingdom.UI
             if (ResourceManager.Instance != null)
             {
                 ResourceManager.Instance.OnResourceChanged += HandleResourceChanged;
-                ResourceManager.Instance.OnPreviewChanged += HandlePreviewChanged;
+                ResourceManager.Instance.OnResourcePreview += HandleResourcePreview;
+                ResourceManager.Instance.OnPreviewCleared += HandlePreviewCleared;
 
                 // Baslangic degerlerini ayarla
                 InitializeValues();
@@ -85,7 +86,8 @@ namespace DecisionKingdom.UI
             if (ResourceManager.Instance != null)
             {
                 ResourceManager.Instance.OnResourceChanged -= HandleResourceChanged;
-                ResourceManager.Instance.OnPreviewChanged -= HandlePreviewChanged;
+                ResourceManager.Instance.OnResourcePreview -= HandleResourcePreview;
+                ResourceManager.Instance.OnPreviewCleared -= HandlePreviewCleared;
             }
         }
         #endregion
@@ -141,17 +143,14 @@ namespace DecisionKingdom.UI
             UpdateColors();
         }
 
-        private void HandlePreviewChanged(ResourceEffect[] effects)
+        private void HandleResourcePreview(ResourceType type, int amount)
+        {
+            ShowPreviewForResource(type, amount);
+        }
+
+        private void HandlePreviewCleared()
         {
             HideAllPreviews();
-
-            if (effects == null || effects.Length == 0)
-                return;
-
-            foreach (var effect in effects)
-            {
-                ShowPreviewForResource(effect.resourceType, effect.amount);
-            }
         }
         #endregion
 

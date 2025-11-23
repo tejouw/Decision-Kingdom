@@ -54,7 +54,7 @@ namespace DecisionKingdom.Managers
 
         private void Update()
         {
-            if (!GameManager.Instance.IsPlaying || _currentEvent == null)
+            if (GameManager.Instance == null || !GameManager.Instance.IsPlaying || _currentEvent == null)
                 return;
 
             HandleInput();
